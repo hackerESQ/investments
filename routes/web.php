@@ -41,7 +41,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     Route::get('test', function() {
         // return Transaction::where('symbol', 'TSLA')->first()->calculateTotalOwnedOnDate(Carbon::parse('2020-01-01'));
         // return app(MarketDataInterface::class)->dividendHistory('AAPL', Carbon::parse('2020-01-01'), now());
-        return Dividend::getDividendData('AAPL');
+        return Dividend::getDividendData('HDV');
     });
 
 });

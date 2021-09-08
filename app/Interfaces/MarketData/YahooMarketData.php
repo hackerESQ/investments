@@ -36,7 +36,7 @@ class YahooMarketData implements MarketDataInterface
         ]);
     }
 
-    public function dividendHistory($symbol, $startDate, $endDate): Collection
+    public function dividends($symbol, $startDate, $endDate): Collection
     {   
         collect($this->client->getHistoricalDividendData($symbol, $startDate, $endDate))
                         ->each(function ($dividend) use ($symbol) {

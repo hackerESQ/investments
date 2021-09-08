@@ -54,6 +54,6 @@ class MarketData extends Model
     }
 
     public function holdings() {
-        return $this->hasMany(Holding::class, 'symbol', 'symbol')->where('holdings.quantity', '>', 0);
+        return $this->hasMany(Holding::class, 'symbol', 'symbol');
     }
 }

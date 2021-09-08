@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Holding;
+use App\Models\Dividend;
 use App\Models\MarketData;
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
@@ -13,15 +15,14 @@ class RefreshDividendData extends Command
      *
      * @var string
      */
-    protected $signature = 'market-data:refresh
-                            {--force= : Ignore refresh delay}';
+    protected $signature = 'dividend-data:refresh';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Refresh market data from market data provider';
+    protected $description = 'Refresh dividend data from data provider';
 
     /**
      * Create a new command instance.
@@ -40,16 +41,14 @@ class RefreshDividendData extends Command
      */
     public function handle()
     {
-        // get all symbols in market data where holding qty > 1
-        $symbols = MarketData::with(['holdings'])->whereHas('holdings', function($query) {
-            $query->where('quantity', '>', 0);
-        })->get(['symbol']);
+        // get all symbols in holdings where holding qty > 1
+        $symbols = Holding::where('quantity', '>', 0)->distinct('symbol')->get(['symbol']);
 
         // $this->option('force')
 
         foreach ($symbols as $symbol) {
             $this->line('Refreshing ' . $symbol->symbol);
-            $symbol->refreshMarketData();
+            Dividend::getDividendData($symbol->symbol);
         }
     }
 }

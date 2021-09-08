@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Dividend extends Model
 {
@@ -73,7 +74,9 @@ class Dividend extends Model
      *
      * @var array
      */
-    protected $casts = [];
+    protected $casts = [
+        'date' => 'datetime',
+    ];
 
     public function refreshDividendData() {
 
@@ -83,12 +86,31 @@ class Dividend extends Model
 
     public static function getDividendData($symbol) 
     {
+        // try to get last dividend date as starting point
+        $start_date = self::where('symbol', $symbol)->latest('date')->first()?->date->addHours(48);
+
+        // or use oldest transaction date
+        if (!$start_date) {
+            $start_date = Transaction::where('symbol', $symbol)->oldest('date')->first()?->date;
+        }
+
+        // welp... let's fail early
+        if (!$start_date) {
+            throw new HttpException(500, 'No valid start date provided');
+        }
+
         // get dividend
-        $dividend_data = app(MarketDataInterface::class)->dividendHistory($symbol, Carbon::parse('2020-01-01'), now());
+        $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
 
         // save data
-        (new self)->insert($dividend_data->toArray());
-
+        foreach($dividend_data->toArray() as $dividend) {
+            (new self)->fill($dividend)->save();
+        }
+        
         return $dividend_data;
+    }
+
+    public function holdings() {
+        return $this->hasMany(Holding::class, 'symbol', 'symbol');
     }
 }

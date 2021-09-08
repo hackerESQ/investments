@@ -92,7 +92,9 @@ class Transaction extends Model
      *
      * @var array
      */
-    protected $casts = [];
+    protected $casts = [
+        'date' => 'datetime',
+    ];
 
     public function portfolio()
     {

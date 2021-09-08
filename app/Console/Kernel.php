@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command(RefreshMarketData::class)->hourly();
+        $schedule->command(RefreshDividendData::class)->weekly();
     }
 
     /**

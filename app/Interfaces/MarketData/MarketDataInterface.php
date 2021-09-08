@@ -14,5 +14,5 @@ interface MarketDataInterface
     /**
      * Get dividend data
      */
-    public function dividendHistory(String $symbol, \DateTimeInterface $startDate, \DateTimeInterface $endDate): Collection;
+    public function dividends(String $symbol, \DateTimeInterface $startDate, \DateTimeInterface $endDate): Collection;
 }

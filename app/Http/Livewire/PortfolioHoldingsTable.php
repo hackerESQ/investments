@@ -2,10 +2,11 @@
 
 namespace App\Http\Livewire;
 
-use App\Traits\FormatsMoney;
 use App\Models\Holding;
+use App\Models\Dividend;
 use App\Models\Portfolio;
 use App\Models\MarketData;
+use App\Traits\FormatsMoney;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -156,9 +157,12 @@ class PortfolioHoldingsTable extends DataTableComponent
     public function query()
     {
         return Holding::where('portfolio_id', $this->portfolio->id)
-            ->with(["transactions" => function ($q) {
-                $q->where('transactions.portfolio_id', $this->portfolio->id);
-            }])->withCount('transactions');
+            ->with([
+                'dividends', 
+                'transactions' => function ($q) {
+                    $q->where('transactions.portfolio_id', $this->portfolio->id);
+                }])
+            ->withCount('transactions');
         //    ->when($this->getFilter('verified'), function ($query, $verified) {
         //        if ($verified === 'yes') {
         //            return $query->whereNotNull('verified');
