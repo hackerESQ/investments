@@ -4,9 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Holding;
 use App\Models\Dividend;
-use App\Models\MarketData;
 use Illuminate\Console\Command;
-use Illuminate\Database\Query\Builder;
 
 class RefreshDividendData extends Command
 {

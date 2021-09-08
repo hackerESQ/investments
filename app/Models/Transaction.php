@@ -19,16 +19,16 @@ class Transaction extends Model
         parent::boot();
 
         static::saved(function ($model) {
-            static::calcHoldings($model);
+            static::syncHolding($model);
         });
 
         static::deleted(function ($model) {
-            static::calcHoldings($model);
+            static::syncHolding($model);
         });
     }
 
-    public static function calcHoldings($model) {
-        // get the holding for a symbol and portfolio
+    public static function syncHolding($model) {
+        // get the holding for a symbol and portfolio (or create one)
         $holding = Holding::firstOrNew([
             'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol
@@ -40,8 +40,7 @@ class Transaction extends Model
             'total_cost_basis' => $model->quantity * $model->cost_basis,
         ]);
 
-        $market_data = MarketData::getMarketData($model->symbol);
-
+        // pull existing transaction data
         $query = self::where([
             'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol,
@@ -54,6 +53,7 @@ class Transaction extends Model
         $total_quantity = $query->qty_purchases - $query->qty_sales;
         $average_cost_basis = $query->cost_basis / $query->qty_purchases;
 
+        // update holding
         $holding->fill([
             'quantity' => $total_quantity,
             'average_cost_basis' => $average_cost_basis,
@@ -63,6 +63,12 @@ class Transaction extends Model
         ]);
 
         $holding->save();
+
+        // load market data while we're here todo: should 'force' this rather than wait for refresh
+        MarketData::getMarketData($model->symbol);
+
+        // load dividends data after holding is created
+        Dividend::getDividendData($model->symbol);
     }
 
     /**

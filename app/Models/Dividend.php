@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,21 +21,27 @@ class Dividend extends Model
         parent::boot();
 
         static::saved(function ($model) {
-            static::calcHoldings($model);
+            static::syncHolding($model);
         });
 
         static::deleted(function ($model) {
-            static::calcHoldings($model);
+            static::syncHolding($model);
         });
     }
 
-    public static function calcHoldings($model) {
+    public static function syncHolding($model) {
+        // check if we got an array, then lets flip back to collection
+        if (is_array($model)) {
+            $model = (new self)->fill($model);
+        }
+
         // get the holding for a symbol and portfolio
         $holding = Holding::where([
             'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol
         ])->firstOrFail();
 
+        // calculate total dividends received
         $query = self::where([
             'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol,
@@ -102,11 +108,11 @@ class Dividend extends Model
         // get dividend
         $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
 
-        // save data
-        foreach($dividend_data->toArray() as $dividend) {
-            (new self)->fill($dividend)->save();
+        if ($dividend_data->isNotEmpty()) {
+            (new self)->insert($dividend_data->toArray());
+            self::syncHolding($dividend_data->last());
         }
-        
+
         return $dividend_data;
     }
 

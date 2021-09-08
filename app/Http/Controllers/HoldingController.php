@@ -19,7 +19,9 @@ class HoldingController extends Controller
     {
         return $holding->load([
             'transactions', 
-            'dividends',
+            'dividends' => function ($q) use ($portfolio) {
+                $q->where('dividends.portfolio_id', $portfolio->id);
+            }
             // todo: in other portfolios
         ]);
     }

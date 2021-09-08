@@ -10,9 +10,7 @@ class Holding extends Model
 {
     use HasFactory;
 
-    protected $with = [
-        'market_data'
-    ];
+    protected $with = [];
 
     /**
      * The attributes that are mass assignable.
@@ -53,7 +51,7 @@ class Holding extends Model
      * @return void
      */
     public function dividends() {
-        return $this->hasMany(Dividend::class, 'portfolio_id', 'portfolio_id');
+        return $this->hasMany(Dividend::class, 'symbol', 'symbol');
     }
 
     public function scopePortfolio($query, $arg)

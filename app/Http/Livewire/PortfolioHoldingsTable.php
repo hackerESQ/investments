@@ -3,7 +3,6 @@
 namespace App\Http\Livewire;
 
 use App\Models\Holding;
-use App\Models\Dividend;
 use App\Models\Portfolio;
 use App\Models\MarketData;
 use App\Traits\FormatsMoney;
@@ -158,7 +157,7 @@ class PortfolioHoldingsTable extends DataTableComponent
     {
         return Holding::where('portfolio_id', $this->portfolio->id)
             ->with([
-                'dividends', 
+                'market_data',
                 'transactions' => function ($q) {
                     $q->where('transactions.portfolio_id', $this->portfolio->id);
                 }])
