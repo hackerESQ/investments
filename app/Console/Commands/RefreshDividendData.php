@@ -6,7 +6,7 @@ use App\Models\MarketData;
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
 
-class RefreshMarketData extends Command
+class RefreshDividendData extends Command
 {
     /**
      * The name and signature of the console command.

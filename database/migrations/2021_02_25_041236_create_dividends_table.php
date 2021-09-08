@@ -18,9 +18,9 @@ class CreateDividendsTable extends Migration
             $table->date('date');
             $table->string('symbol');
             $table->foreignId('portfolio_id');
-            $table->bigInteger('dividend_amount');
-            $table->float('total_quantity_owned',10,3);
-            $table->bigInteger('total_received');
+            $table->float('dividend_amount',10,3);
+            $table->float('total_quantity_owned',10,3)->nullable();
+            $table->float('total_received',10,3)->nullable();
             $table->timestamps();
         });
     }

@@ -13,16 +13,16 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class PortfolioHoldingsTable extends DataTableComponent
 {
-
     use FormatsMoney;
 
+    public $refresh = 1 * 60 * 1000; // poll every 1 minute
     public bool $columnSelect = true;
     public string $defaultSortColumn = 'id';
     public bool $reorderEnabled = false;
     public bool $hideBulkActionsOnEmpty = true;
     public array $bulkActions = [
         // 'delete'   => 'Delete',
-    ];
+    ]; 
 
     public $portfolio;
 
@@ -101,11 +101,25 @@ class PortfolioHoldingsTable extends DataTableComponent
                 ->format(function ($value, $column, $row) {
                     return $this->formatMoney($row->dividends_earned);
                 }),
+            Column::make('52 week low', 'fifty_two_week_low')
+                ->sortable(function (Builder $query, $direction) {
+                    return $query->orderBy(MarketData::select('fifty_two_week_low')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
+                })
+                ->format(function ($value, $column, $row) {
+                    return $this->formatMoney($row->market_data->fifty_two_week_low);
+                }),
+            Column::make('52 week high', 'fifty_two_week_high')
+                ->sortable(function (Builder $query, $direction) {
+                    return $query->orderBy(MarketData::select('fifty_two_week_high')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
+                })
+                ->format(function ($value, $column, $row) {
+                    return $this->formatMoney($row->market_data->fifty_two_week_high);
+                }),
             Column::make('Number of Transactions', 'transactions_count')
                 ->sortable(),
             Column::make('Market Data Age', 'market_data_age')
                 ->sortable(function (Builder $query, $direction) {
-                    return $query->orderBy(MarketData::select('updated_at')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
+                    return $query->orderBy(MarketData::select('updated_at')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction == 'asc' ? 'desc' : 'asc');
                 })
                 ->format(function ($value, $column, $row) {
                     return $row->market_data->updated_at->diffForHumans();

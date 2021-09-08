@@ -23,38 +23,37 @@ class MarketData extends Model
         'symbol',
         'name',
         'market_value',
-        '52_week_high',
-        '52_week_low',
+        'fifty_two_week_high',
+        'fifty_two_week_low',
     ];
 
     public function refreshMarketData() {
 
-        return static::loadMarketData($this->attributes['symbol']);
-        
+        return static::getMarketData($this->attributes['symbol']);
+
     }
 
-    public static function loadMarketData($symbol) 
+    public static function getMarketData($symbol) 
     {
         $market_data = self::firstOrNew(['symbol' => $symbol]);
 
         // check if new or stale
         if (!$market_data->exists || now()->diffInMinutes($market_data->updated_at) >= config('market_data.refresh')) {
+            
             // get quote
             $quote = app(MarketDataInterface::class)->quote($symbol);
 
             // fill data
-            $market_data->fill([
-                'symbol' => $symbol,
-                'name' => $quote->get('name'),
-                'market_value' => $quote->get('market_value'),
-                '52_week_high' => $quote->get('52_week_high'),
-                '52_week_low' => $quote->get('52_week_low'),
-            ]);
+            $market_data->fill($quote->toArray());
 
-            // save
-            $market_data->save();
+            // save with timestamps updated
+            $market_data->touch();
         }
 
         return $market_data;
+    }
+
+    public function holdings() {
+        return $this->hasMany(Holding::class, 'symbol', 'symbol')->where('holdings.quantity', '>', 0);
     }
 }

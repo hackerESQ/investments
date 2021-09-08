@@ -6,7 +6,13 @@ use Illuminate\Support\Collection;
 
 interface MarketDataInterface
 {
+    /**
+     * Get quote data
+     */
     public function quote(String $symbol): Collection;
 
-    public function formatQuote(mixed $quote): Collection;
+    /**
+     * Get dividend data
+     */
+    public function dividendHistory(String $symbol, \DateTimeInterface $startDate, \DateTimeInterface $endDate): Collection;
 }

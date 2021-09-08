@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\Dividend;
+use App\Models\Transaction;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HoldingController;
 use App\Http\Controllers\TransactionController;
+use App\Interfaces\MarketData\MarketDataInterface;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,5 +37,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     // holding view
     Route::get('portfolio/{portfolio}/holding/{holding}', [HoldingController::class, 'show'])->name('holding.show');
+
+    Route::get('test', function() {
+        // return Transaction::where('symbol', 'TSLA')->first()->calculateTotalOwnedOnDate(Carbon::parse('2020-01-01'));
+        // return app(MarketDataInterface::class)->dividendHistory('AAPL', Carbon::parse('2020-01-01'), now());
+        return Dividend::getDividendData('AAPL');
+    });
 
 });

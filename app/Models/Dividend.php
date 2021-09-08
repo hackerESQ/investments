@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Interfaces\MarketData\MarketDataInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dividend extends Model
 {
@@ -50,7 +52,14 @@ class Dividend extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'symbol',
+        'date',
+        'portfolio_id',
+        'dividend_amount',
+        'total_quantity_owned',
+        'total_received',
+    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -65,4 +74,21 @@ class Dividend extends Model
      * @var array
      */
     protected $casts = [];
+
+    public function refreshDividendData() {
+
+        return static::getDividendData($this->attributes['symbol']);
+
+    }
+
+    public static function getDividendData($symbol) 
+    {
+        // get dividend
+        $dividend_data = app(MarketDataInterface::class)->dividendHistory($symbol, Carbon::parse('2020-01-01'), now());
+
+        // save data
+        (new self)->insert($dividend_data->toArray());
+
+        return $dividend_data;
+    }
 }

@@ -65,4 +65,16 @@ class Holding extends Model
     {
         return $query->where('symbol', $arg);
     }
+
+    public function calculateTotalOwnedOnDate($date) 
+    {
+        return Transaction::select(['symbol', 'portfolio_id', 'transaction_type', 'quantity'])
+            ->where('portfolio_id', $this->attributes['portfolio_id'])
+            ->where('symbol', $this->attributes['symbol'])
+            ->whereDate('date', '<', $date)
+            ->get()
+            ->reduce(function ($carry, $item) {
+                return $item->transaction_type == 'BUY' ? $carry + $item->quantity : $carry - $item->quantity;
+            });
+    }
 }

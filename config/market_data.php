@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'refresh' => 60, // 60 minutes
+    'refresh' => 30, // 30 minutes
 
     'default' => env('MARKET_DATA', 'yahoo'),
 

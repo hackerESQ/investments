@@ -40,7 +40,7 @@ class Transaction extends Model
             'total_cost_basis' => $model->quantity * $model->cost_basis,
         ]);
 
-        $market_data = MarketData::loadMarketData($model->symbol);
+        $market_data = MarketData::getMarketData($model->symbol);
 
         $query = self::where([
             'portfolio_id' => $model->portfolio_id,
@@ -59,6 +59,7 @@ class Transaction extends Model
             'average_cost_basis' => $average_cost_basis,
             'total_cost_basis' => $total_quantity * $average_cost_basis,
             'realized_gain_loss_dollars' => $query->realized_gains,
+            'dividends_earned' => Dividend::where(['symbol'=>$model->symbol,'portfolio_id'=>$model->portfolio_id])->sum('total_received'),
         ]);
 
         $holding->save();
@@ -110,5 +111,15 @@ class Transaction extends Model
      */
     public function market_data() {
         return $this->hasOne(MarketData::class, 'symbol', 'symbol');
+    }
+
+    public function scopePortfolio($query, $portfolio)
+    {
+        return $query->where('portfolio_id', $portfolio);
+    }
+
+    public function scopeSymbol($query, $symbol)
+    {
+        return $query->where('symbol', $symbol);
     }
 }
