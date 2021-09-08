@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PortfolioRequest;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
+use App\Imports\PortfolioImport;
+use App\Http\Requests\PortfolioRequest;
 
 class PortfolioController extends Controller
 {
@@ -86,5 +87,27 @@ class PortfolioController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function importForm(Request $request)
+    {
+        return view('pages.portfolios.import');
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function import(Request $request,)
+    {
+        $file = $request->file('import')->store('/', 'local');
+        
+        $import = (new PortfolioImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
+
+        return redirect(route('portfolio.index')); 
     }
 }

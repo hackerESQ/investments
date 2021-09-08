@@ -24,8 +24,6 @@ class PortfolioIndexTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Id')
-                  ->sortable(),
             Column::make('Title')
                   ->searchable(),
             Column::make('Notes')

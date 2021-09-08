@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,7 +31,7 @@ class Dividend extends Model
     }
 
     public static function syncHolding($model) {
-        // check if we got an array, then lets flip back to collection
+        // check if we got an array, then lets create a dummy model
         if (is_array($model)) {
             $model = (new self)->fill($model);
         }
@@ -86,16 +87,24 @@ class Dividend extends Model
 
     public function refreshDividendData() {
 
-        return static::getDividendData($this->attributes['symbol']);
+        return static::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id']);
 
     }
 
-    public static function getDividendData($symbol) 
+    public static function getDividendData(string $symbol, int $portfolio_id, \DateTimeInterface $start_date = null) 
     {
-        // try to get last dividend date as starting point
-        $start_date = self::where('symbol', $symbol)->latest('date')->first()?->date->addHours(48);
+        $last_dividend_date = self::where([
+                'symbol' => $symbol, 
+                'portfolio_id' => $portfolio_id
+            ])->latest('date')->first()?->date->addHours(48);
 
-        // or use oldest transaction date
+        // start date not provided, try to get last dividend date as starting point
+        if (!$start_date) {
+
+            $start_date = $last_dividend_date;
+        }
+
+        // no dividends on record, try to use oldest transaction date
         if (!$start_date) {
             $start_date = Transaction::where('symbol', $symbol)->oldest('date')->first()?->date;
         }
@@ -105,18 +114,58 @@ class Dividend extends Model
             throw new HttpException(500, 'No valid start date provided');
         }
 
-        // get dividend
-        $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
+        // if start date is less than last dividend date, we only need to update existing records (dont want to pull in duplicates)
+        if (Carbon::parse($start_date)->lessThan($last_dividend_date)) {
+            // update existing dividends
+            $dividend_data = self::where('symbol', $symbol)->get()->each(function($dividend) {
+                $holding = $dividend->getHolding();
+                $total_quantity_owned = $holding->calculateTotalOwnedOnDate($dividend->date);
+                $total_received = $total_quantity_owned * $dividend->dividend_amount;
 
-        if ($dividend_data->isNotEmpty()) {
+                $dividend->fill([
+                    'total_quantity_owned' => $total_quantity_owned,
+                    'total_received' => $total_received
+                ]);
+
+                $dividend->save();
+            });
+
+            // do we need to add any missing dividends that pre-date our records?
+            $first_dividend_date = self::where([
+                    'symbol' => $symbol, 
+                    'portfolio_id' => $portfolio_id
+                ])->oldest('date')->first()?->date;
+
+            if (Carbon::parse($start_date)->lessThan($first_dividend_date)) {
+                // load missing as a supplement
+                $supplement = app(MarketDataInterface::class)->dividends($symbol, $start_date, $first_dividend_date);
+
+                (new self)->insert($supplement->toArray());
+            }
+            
+        } else {
+            // get new dividend data
+            $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
+
+            // add records
             (new self)->insert($dividend_data->toArray());
-            self::syncHolding($dividend_data->last());
         }
+
+        // no dividends, exit
+        if ($dividend_data->isEmpty()) {
+            return collect();
+        }
+
+        self::syncHolding($dividend_data->last());
 
         return $dividend_data;
     }
 
     public function holdings() {
         return $this->hasMany(Holding::class, 'symbol', 'symbol');
+    }
+
+    public function getHolding() {
+        return Holding::symbol($this->attributes['symbol'])->portfolio($this->attributes['portfolio_id'])->first();
     }
 }

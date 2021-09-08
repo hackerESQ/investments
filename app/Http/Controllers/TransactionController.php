@@ -92,26 +92,4 @@ class TransactionController extends Controller
     {
         //
     }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function importForm(Request $request, Portfolio $portfolio)
-    {
-        return view('pages.transactions.import', ['portfolio' => $portfolio]);
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function import(Request $request, Portfolio $portfolio)
-    {
-        $file = $request->file('import')->store('/', 'local');
-        
-        $import = (new TransactionImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
-
-        return redirect(route('portfolio.show', $portfolio->id)); 
-    }
 }

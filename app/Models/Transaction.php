@@ -51,7 +51,9 @@ class Transaction extends Model
         ->first();
 
         $total_quantity = $query->qty_purchases - $query->qty_sales;
-        $average_cost_basis = $query->cost_basis / $query->qty_purchases;
+        $average_cost_basis = $query->qty_purchases > 0 
+                                ? $query->cost_basis / $query->qty_purchases 
+                                : 0;
 
         // update holding
         $holding->fill([
@@ -59,7 +61,6 @@ class Transaction extends Model
             'average_cost_basis' => $average_cost_basis,
             'total_cost_basis' => $total_quantity * $average_cost_basis,
             'realized_gain_loss_dollars' => $query->realized_gains,
-            'dividends_earned' => Dividend::where(['symbol'=>$model->symbol,'portfolio_id'=>$model->portfolio_id])->sum('total_received'),
         ]);
 
         $holding->save();
@@ -68,7 +69,7 @@ class Transaction extends Model
         MarketData::getMarketData($model->symbol);
 
         // load dividends data after holding is created
-        Dividend::getDividendData($model->symbol);
+        Dividend::getDividendData($model->symbol, $model->portfolio_id, $model->date);
     }
 
     /**

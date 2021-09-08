@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Import Transactions') . ': ' . $portfolio->title }}
+            {{ __('Import Portfolio') }}
 
-            <x-link-button class="ml-4" href="{{ route('portfolio.show', $portfolio->id) }}">
-                {{ __('Back to portfolio') }}
+            <x-link-button class="ml-4" href="{{ route('portfolio.index') }}">
+                {{ __('Back to home') }}
             </x-link-button>
         </h2>
     </x-slot>
@@ -21,7 +21,7 @@
                     </div>
                 @endif
 
-                <form method="POST" enctype="multipart/form-data" action="{{ route('transaction.import', $portfolio->id) }}">
+                <form method="POST" enctype="multipart/form-data" action="{{ route('portfolio.import') }}">
                     @csrf
 
                     <div class="mt-4">
