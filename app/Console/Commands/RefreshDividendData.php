@@ -40,13 +40,13 @@ class RefreshDividendData extends Command
     public function handle()
     {
         // get all symbols in holdings where holding qty > 1
-        $symbols = Holding::where('quantity', '>', 0)->distinct('symbol')->get(['symbol']);
+        $holdings = Holding::where('quantity', '>', 0)->get(['symbol', 'portfolio_id']);
 
         // $this->option('force')
 
-        foreach ($symbols as $symbol) {
-            $this->line('Refreshing ' . $symbol->symbol);
-            Dividend::getDividendData($symbol->symbol);
+        foreach ($holdings as $holding) {
+            $this->line('Refreshing ' . $holding->symbol);
+            Dividend::getDividendData($holding->symbol, $holding->portfolio_id);
         }
     }
 }

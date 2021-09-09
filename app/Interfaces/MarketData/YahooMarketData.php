@@ -16,19 +16,21 @@ class YahooMarketData implements MarketDataInterface
         $this->client = ApiClientFactory::createApiClient();
     }
 
-    public function quote($symbol): Collection
+    public function exists(String $symbol): bool
     {
-        return $this->mapQuoteData($this->client->getQuote($symbol));
+        return $this->quote($symbol)->isNotEmpty();
     }
 
-    private function mapQuoteData($quote): Collection
+    public function quote($symbol): Collection
     {
-        if (!$quote) {
+        $quote = $this->client->getQuote($symbol);
+
+        if (empty($quote)) {
             return collect();
         }
 
         return collect([
-            'name' => $quote->getShortName(),
+            'name' => $quote->getLongName() ?? $quote->getShortName(),
             'symbol' => $quote->getSymbol(),
             'market_value' => $quote->getRegularMarketPrice(),
             'fifty_two_week_high' => $quote->getFiftyTwoWeekHigh(),

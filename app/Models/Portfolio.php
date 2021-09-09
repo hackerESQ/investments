@@ -34,7 +34,7 @@ class Portfolio extends Model
     protected $casts = [];
 
     public function holdings() {
-        return $this->hasMany(Holding::class);
+        return $this->hasMany(Holding::class, 'portfolio_id', 'id');
     }
 
     public function transactions() {

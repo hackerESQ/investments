@@ -17,7 +17,7 @@ class CreateDividendsTable extends Migration
             $table->id();
             $table->date('date');
             $table->string('symbol');
-            $table->foreignId('portfolio_id');
+            $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->float('dividend_amount',10,3);
             $table->float('total_quantity_owned',10,3)->nullable();
             $table->float('total_received',10,3)->nullable();

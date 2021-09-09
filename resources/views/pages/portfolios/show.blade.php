@@ -1,13 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Portfolio') . ': ' . $portfolio->title }}
+            {{ __('Viewing Portfolio') . ': ' . $portfolio->title }}
+
+            <x-link-button class="ml-4" href="{{ route('portfolio.index', $portfolio->id) }}">
+                {{ __('Back to Home') }}
+            </x-link-button>
 
             <x-link-button class="ml-4" href="{{ route('portfolio.edit', $portfolio->id) }}">
                 {{ __('Edit Portfolio') }}
             </x-link-button>
             
-            <x-link-button class="ml-4" href="{{ route('transaction.create', $portfolio->id) }}">
+            <x-link-button class="ml-4" href="{{ route('portfolio.transaction.create', $portfolio->id) }}">
                 {{ __('Add Transaction') }}
             </x-link-button>
         </h2>

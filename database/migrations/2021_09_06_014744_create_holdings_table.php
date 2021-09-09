@@ -15,7 +15,7 @@ class CreateHoldingsTable extends Migration
     {
         Schema::create('holdings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('portfolio_id');
+            $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->string('symbol');
             $table->float('quantity', 10, 3);
             $table->float('average_cost_basis', 10, 3);

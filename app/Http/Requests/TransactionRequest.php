@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Holding;
+use App\Rules\SymbolValidationRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -45,8 +46,8 @@ class TransactionRequest extends FormRequest
     public function rules()
     {
         return [
-            'symbol' => ['required'],
-            'date' => ['required', 'date'],
+            'symbol' => ['required', new SymbolValidationRule],
+            'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:now'],
             'transaction_type' => ['required', 'in:SELL,BUY'],
             'quantity' => [
                 'required', 
@@ -78,7 +79,8 @@ class TransactionRequest extends FormRequest
     public function messages()
     {
         return [
-            'quantity.max' => 'Insufficient quantity. You only have ' . $this->holding->quantity . ' shares of ' . $this->input('symbol') . ' available.',
+            'quantity.max' => 'Insufficient quantity. You only have ' . $this->holding->quantity . ' shares of ' . $this->input('symbol') . ' available',
+            'date.before' => 'The date should be before today',
         ];
     }
 }

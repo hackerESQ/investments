@@ -46,7 +46,7 @@ class PortfolioHoldingsTable extends DataTableComponent
                     $query->orWhere(MarketData::select('name')->whereColumn('market_data.symbol', 'holdings.symbol'), 'like', '%' . $searchTerm . '%');
                 })
                 ->format(function ($value, $column, $row) {
-                    return $row->market_data->name;
+                    return $row->market_data?->name;
                 }),
             Column::make('Quantity', 'quantity')
                 ->sortable()
@@ -66,21 +66,21 @@ class PortfolioHoldingsTable extends DataTableComponent
                     return $query->orderBy(MarketData::select('market_value')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
                 })
                 ->format(function ($value, $column, $row) {
-                    return $this->formatMoney($row->market_data->market_value);
+                    return $this->formatMoney($row->market_data?->market_value);
                 }),
             Column::make('Total Market Value', 'market_value')
                 ->sortable(function (Builder $query, $direction) {
                     return $query->orderBy(MarketData::select('market_value')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
                 })
                 ->format(function ($value, $column, $row) {
-                    return $this->formatMoney($row->market_data->market_value * $row->quantity);
+                    return $this->formatMoney($row->market_data?->market_value * $row->quantity);
                 }),
             Column::make('Market Gain/Loss ($)', 'market_gain_loss_dollars')
                 ->sortable(function (Builder $query, $direction) {
                     return $query->orderBy(MarketData::selectRaw('((market_data.market_value - holdings.average_cost_basis) * holdings.quantity) AS market_gain_loss_dollars')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
                 })
                 ->format(function ($value, $column, $row) {
-                    return $this->formatMoney(($row->market_data->market_value * $row->quantity) - $row->total_cost_basis);
+                    return $this->formatMoney(($row->market_data?->market_value * $row->quantity) - $row->total_cost_basis);
                 }),
             Column::make('Market Gain/Loss (%)', 'market_gain_loss_percent')
                 ->sortable(function (Builder $query, $direction) {
@@ -89,7 +89,7 @@ class PortfolioHoldingsTable extends DataTableComponent
                 ->format(function ($value, $column, $row) {
                     return $row->average_cost_basis == 0 
                                 ? 0 . "%"
-                                : number_format((($row->market_data->market_value - $row->average_cost_basis) / $row->average_cost_basis) * 100, 2) . "%";
+                                : number_format((($row->market_data?->market_value - $row->average_cost_basis) / $row->average_cost_basis) * 100, 2) . "%";
                 }),
             Column::make('Realized Gain/Loss ($)', 'realized_gain_loss_dollars')
                 ->sortable()
@@ -106,14 +106,14 @@ class PortfolioHoldingsTable extends DataTableComponent
                     return $query->orderBy(MarketData::select('fifty_two_week_low')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
                 })
                 ->format(function ($value, $column, $row) {
-                    return $this->formatMoney($row->market_data->fifty_two_week_low);
+                    return $this->formatMoney($row->market_data?->fifty_two_week_low);
                 }),
             Column::make('52 week high', 'fifty_two_week_high')
                 ->sortable(function (Builder $query, $direction) {
                     return $query->orderBy(MarketData::select('fifty_two_week_high')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction);
                 })
                 ->format(function ($value, $column, $row) {
-                    return $this->formatMoney($row->market_data->fifty_two_week_high);
+                    return $this->formatMoney($row->market_data?->fifty_two_week_high);
                 }),
             Column::make('Number of Transactions', 'transactions_count')
                 ->sortable(),
@@ -122,7 +122,7 @@ class PortfolioHoldingsTable extends DataTableComponent
                     return $query->orderBy(MarketData::select('updated_at')->whereColumn('market_data.symbol', 'holdings.symbol'), $direction == 'asc' ? 'desc' : 'asc');
                 })
                 ->format(function ($value, $column, $row) {
-                    return $row->market_data->updated_at->diffForHumans();
+                    return $row->market_data?->updated_at->diffForHumans();
                 }),
             Column::make('Updated At')
                 ->sortable(),

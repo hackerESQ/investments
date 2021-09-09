@@ -6,6 +6,12 @@ use Illuminate\Support\Collection;
 
 interface MarketDataInterface
 {
+
+    /**
+     * Does this symbol actually exist?
+     */
+    public function exists(String $symbol): bool;
+
     /**
      * Get quote data
      */

@@ -17,12 +17,19 @@ class HoldingController extends Controller
      */
     public function show(Portfolio $portfolio, Holding $holding)
     {
-        return $holding->load([
+        $holding = $holding->load([
+            'market_data',
             'transactions', 
             'dividends' => function ($q) use ($portfolio) {
                 $q->where('dividends.portfolio_id', $portfolio->id);
             }
             // todo: in other portfolios
+            
+        ]);
+
+        return view('pages.holdings.show', [
+            'portfolio' => $portfolio,
+            'holding' => $holding,
         ]);
     }
 }

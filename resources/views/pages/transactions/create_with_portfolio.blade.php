@@ -21,12 +21,12 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('transaction.store', $portfolio->id) }}">
+                <form method="POST" action="{{ route('portfolio.transaction.store', $portfolio->id) }}">
                     @csrf
 
                     <div class="mt-4">
                         <x-jet-label for="symbol" value="{{ __('Symbol') }}" />
-                        <x-jet-input id="symbol" value="{{ old('symbol') }}" class="block mt-1 w-full" type="text" name="symbol" required />
+                        <x-jet-input id="symbol" value="{{ old('symbol') ?? request('symbol') }}" class="block mt-1 w-full" type="text" name="symbol" required />
                     </div>
 
                     <div class="mt-4">

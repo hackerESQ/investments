@@ -11,6 +11,37 @@ class Transaction extends Model
     use HasFactory;
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'symbol',
+        'date',
+        'portfolio_id',
+        'transaction_type',
+        'quantity',
+        'cost_basis',
+        'sale_price'
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
+    /**
      *
      * @return void
      */
@@ -68,40 +99,11 @@ class Transaction extends Model
         // load market data while we're here todo: should 'force' this rather than wait for refresh
         MarketData::getMarketData($model->symbol);
 
-        // load dividends data after holding is created
-        Dividend::getDividendData($model->symbol, $model->portfolio_id, $model->date);
+        // load dividends data in queue after holding is created
+        dispatch(function () use ($model) {
+            $model->refreshDividends();
+        });
     }
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'symbol',
-        'date',
-        'portfolio_id',
-        'transaction_type',
-        'quantity',
-        'cost_basis',
-        'sale_price'
-    ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'date' => 'datetime',
-    ];
 
     public function portfolio()
     {
@@ -130,5 +132,10 @@ class Transaction extends Model
     public function scopeSymbol($query, $symbol)
     {
         return $query->where('symbol', $symbol);
+    }
+
+    public function refreshDividends() 
+    {
+        return Dividend::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id'], $this->getAttribute('date'));
     }
 }

@@ -16,7 +16,7 @@ class CreateTransactionsTable extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('symbol');
-            $table->foreignId('portfolio_id');
+            $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->string('transaction_type');
             $table->float('quantity', 10, 3);
             $table->float('cost_basis', 10, 3);

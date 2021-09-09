@@ -28,7 +28,7 @@ class TransactionController extends Controller
      */
     public function create(Request $request, Portfolio $portfolio)
     {
-        return view('pages.transactions.create', [
+        return view('pages.transactions.create_with_portfolio', [
             'portfolio' => $portfolio,
             'portfolios' => Portfolio::all(),
             'transaction_types' => [['id' => 'BUY', 'title' => __('Buy')], ['id' => 'SELL', 'title' => __('Sell')]],
@@ -55,17 +55,6 @@ class TransactionController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Transaction $transaction)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Transaction  $transaction
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Transaction $transaction)
     {
         //
     }

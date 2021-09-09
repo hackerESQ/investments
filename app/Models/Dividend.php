@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
@@ -12,6 +11,36 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class Dividend extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'symbol',
+        'date',
+        'portfolio_id',
+        'dividend_amount',
+        'total_quantity_owned',
+        'total_received',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'date' => 'datetime',
+    ];
 
     /**
      *
@@ -55,44 +84,9 @@ class Dividend extends Model
         ]);
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'symbol',
-        'date',
-        'portfolio_id',
-        'dividend_amount',
-        'total_quantity_owned',
-        'total_received',
-    ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'date' => 'datetime',
-    ];
-
-    public function refreshDividendData() {
-
-        return static::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id']);
-
-    }
-
     public static function getDividendData(string $symbol, int $portfolio_id, \DateTimeInterface $start_date = null) 
     {
+        // most recent dividend date for given symbol and portfolio (last dividend date)
         $last_dividend_date = self::where([
                 'symbol' => $symbol, 
                 'portfolio_id' => $portfolio_id
@@ -100,7 +94,6 @@ class Dividend extends Model
 
         // start date not provided, try to get last dividend date as starting point
         if (!$start_date) {
-
             $start_date = $last_dividend_date;
         }
 
@@ -114,27 +107,33 @@ class Dividend extends Model
             throw new HttpException(500, 'No valid start date provided');
         }
 
-        // if start date is less than last dividend date, we only need to update existing records (dont want to pull in duplicates)
+        // if start date is less than last dividend date, then 
+        // we only need to UPDATE existing records (dont want to pull in duplicates)
         if (Carbon::parse($start_date)->lessThan($last_dividend_date)) {
-            // update existing dividends
-            $dividend_data = self::where('symbol', $symbol)->get()->each(function($dividend) {
-                $holding = $dividend->getHolding();
-                $total_quantity_owned = $holding->calculateTotalOwnedOnDate($dividend->date);
-                $total_received = $total_quantity_owned * $dividend->dividend_amount;
+            // update each existing dividend
+            $dividend_data = self::where([
+                'symbol' => $symbol,
+                'portfolio_id' => $portfolio_id,
+            ])
+            ->whereBetween('date', [$start_date, $last_dividend_date])
+            ->get()
+            ->each(function($dividend) {
+                
+                $total_quantity_owned = $dividend->getHolding()->calculateTotalOwnedOnDate($dividend->date);
 
                 $dividend->fill([
                     'total_quantity_owned' => $total_quantity_owned,
-                    'total_received' => $total_received
+                    'total_received' => $total_quantity_owned * $dividend->dividend_amount
                 ]);
 
-                $dividend->save();
+                $dividend->saveQuietly(); // will be syncing holdings later
             });
-
+    
             // do we need to add any missing dividends that pre-date our records?
             $first_dividend_date = self::where([
-                    'symbol' => $symbol, 
-                    'portfolio_id' => $portfolio_id
-                ])->oldest('date')->first()?->date;
+                'symbol' => $symbol, 
+                'portfolio_id' => $portfolio_id
+            ])->oldest('date')->first()?->date;
 
             if (Carbon::parse($start_date)->lessThan($first_dividend_date)) {
                 // load missing as a supplement
@@ -142,9 +141,8 @@ class Dividend extends Model
 
                 (new self)->insert($supplement->toArray());
             }
-            
         } else {
-            // get new dividend data
+            // fetch new dividend data
             $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
 
             // add records

@@ -4,13 +4,11 @@ namespace App\Http\Livewire;
 
 use App\Models\Portfolio;
 use App\Traits\FormatsMoney;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-// use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class PortfolioIndexTable extends DataTableComponent
 {
-
     use FormatsMoney;
     
     public bool $columnSelect = true;
@@ -25,73 +23,58 @@ class PortfolioIndexTable extends DataTableComponent
     {
         return [
             Column::make('Title')
-                  ->searchable(),
+                    ->searchable()
+                    ->sortable(),
             Column::make('Notes')
-                  ->searchable(),
+                    ->searchable()
+                    ->sortable(),          
             Column::make('Total Cost Basis', 'holdings_sum_total_cost_basis')
-                  ->format(function ($value, $column, $row) {
-                      return $this->formatMoney($value);
-                  }),
+                    ->format(function ($value, $column, $row) {
+                        return $this->formatMoney($value);
+                    })
+                    ->sortable(),
+            Column::make('Total Market Value', 'total_market_value')
+                    ->format(function ($value, $column, $row) {
+                        return $this->formatMoney($value);
+                    })
+                    ->sortable(),
+            Column::make('Market Gain / Loss ($)', 'total_gain_loss_dollars')
+                    ->format(function ($value, $column, $row) {
+                        return $this->formatMoney($value);
+                    })
+                    ->sortable(),
+            Column::make('Market Gain / Loss (%)', 'total_gain_loss_percent')
+                    ->format(function ($value, $column, $row) {
+                        return number_format($value, 2) . "%";
+                    })
+                    ->sortable(),
+            Column::make('Realized Gain / Loss ($)', 'holdings_sum_realized_gain_loss_dollars')
+                    ->format(function ($value, $column, $row) {
+                            return $this->formatMoney($value);
+                    })
+                    ->sortable(),
             Column::make('Dividends Earned', 'holdings_sum_dividends_earned')
-                  ->format(function ($value, $column, $row) {
-                      return $this->formatMoney($value);
-                  }),
-            Column::make('Updated At'),
-            Column::make('Created At'),
-            // Column::make('Active')
-            //       ->sortable()
-            //       ->format(function ($value) {
-            //           return view('tables.cells.boolean',
-            //               [
-            //                   'boolean' => $value
-            //               ]
-            //           );
-            //       })
-            //       ,
-            // Column::make('Verified', 'email_verified_at')
-            //       ->sortable()
-            //       ->excludeFromSelectable(),
+                    ->format(function ($value, $column, $row) {
+                            return $this->formatMoney($value);
+                    })
+                    ->sortable(),
+            Column::make('Updated At')
+                    ->sortable(),
+            Column::make('Created At')
+                    ->sortable(),
         ];
     }
 
-    // public function filters(): array
-    // {
-    //     return [
-    //         'verified' => Filter::make('E-mail Verified')
-    //             ->select([
-    //                 ''    => 'Any',
-    //                 'yes' => 'Yes',
-    //                 'no'  => 'No',
-    //             ]),
-    //         'active'   => Filter::make('Active')
-    //             ->select([
-    //                 ''    => 'Any',
-    //                 'yes' => 'Yes',
-    //                 'no'  => 'No',
-    //             ]),
-    //         'verified_from' => Filter::make('Verified From')
-    //             ->date(),
-    //         'verified_to' => Filter::make('Verified To')
-    //             ->date(),
-    //     ];
-    // }
-
     public function query()
     {
-        return Portfolio::query()
-            ->withSum('holdings', 'total_cost_basis')
-            ->withSum('holdings', 'dividends_earned');
-        //    ->when($this->getFilter('verified'), function ($query, $verified) {
-        //        if ($verified === 'yes') {
-        //            return $query->whereNotNull('verified');
-        //        }
-
-        //        return $query->whereNull('verified');
-        //    })
-        //     ->when($this->getFilter('active'), fn($query, $active) => $query->where('active', $active === 'yes'))
-        //     ->when($this->getFilter('verified_from'), fn($query, $date) => $query->where('email_verified_at', '>=', $date))
-        //     ->when($this->getFilter('verified_to'), fn($query, $date) => $query->where('email_verified_at', '<=', $date));
-
+            return Portfolio::query()
+                ->withSum('holdings', 'total_cost_basis')
+                ->withSum('holdings', 'dividends_earned')
+                ->withSum('holdings', 'realized_gain_loss_dollars')
+                ->selectRaw('@total_market_value:=(SELECT SUM(holdings.quantity * market_data.market_value) FROM holdings JOIN market_data ON market_data.symbol = holdings.symbol WHERE portfolios.id = holdings.portfolio_id) AS total_market_value')
+                ->selectRaw('@sum_total_cost_basis:=(SELECT SUM(holdings.total_cost_basis) FROM holdings WHERE portfolios.id = holdings.portfolio_id) AS sum_total_cost_basis')
+                ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
+                ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent');
     }
 
     public function delete(): void

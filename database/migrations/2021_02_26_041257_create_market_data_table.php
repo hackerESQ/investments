@@ -19,8 +19,6 @@ class CreateMarketDataTable extends Migration
             $table->float('market_value', 10, 3);
             $table->float('fifty_two_week_low', 10, 3);
             $table->float('fifty_two_week_high', 10, 3);
-            $table->float('total_gain_loss_dollars', 10, 3);
-            $table->float('total_gain_loss_percent', 10, 3);
             $table->timestamps();
         });
     }

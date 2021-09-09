@@ -44,7 +44,7 @@ class PortfolioImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                                         'title' => $row['portfolio_id']
                                     ]);
                                 });
-
+ 
             Transaction::create([
                 'symbol' => $row['symbol'],
                 'portfolio_id' => $portfolio->id,

@@ -81,12 +81,14 @@ class PortfolioController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Portfolio  $portfolio
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($portfolio)
     {
-        //
+        $portfolio->delete();
+
+        return redirect(route('portfolio.index'));
     }
 
     /**
