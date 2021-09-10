@@ -83,7 +83,7 @@ class YahooMarketData implements MarketDataInterface
                 ->each(function($holding) use ($split, $symbol) {
                 
                     $date = $split->getDate()->format('Y-m-d H:i:s');
-                    $split_amount = explode(':', $split->getStockSplits())[0];
+                    $split_amount = (int) explode(':', $split->getStockSplits())[0];
                     $old_quantity_owned = $holding->calculateTotalOwnedOnDate($date);
 
                     array_push($this->splits, [
