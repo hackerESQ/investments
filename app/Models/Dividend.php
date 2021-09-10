@@ -50,9 +50,9 @@ class Dividend extends Model
         $dividends = self::where([
             'dividends.symbol' => $model->symbol,
         ])->select(['holdings.portfolio_id', 'dividends.date', 'dividends.symbol', 'dividends.dividend_amount'])
-        ->selectRaw('@purchased:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date) AND holdings.portfolio_id = transactions.portfolio_id ) AS `qty_purchases`')
-        ->selectRaw('@sold:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date)  AND holdings.portfolio_id = transactions.portfolio_id ) AS `qty_sold`')
-        ->selectRaw('@owned:=(@purchased - @sold) AS `qty_owned`')
+        ->selectRaw('@purchased:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date) AND holdings.portfolio_id = transactions.portfolio_id ) AS `purchased`')
+        ->selectRaw('@sold:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date)  AND holdings.portfolio_id = transactions.portfolio_id ) AS `sold`')
+        ->selectRaw('@owned:=(@purchased - @sold) AS `owned`')
         ->selectRaw('@dividends_received:=(@owned * dividends.dividend_amount) AS `dividends_received`')
         ->join('transactions', 'transactions.symbol', 'dividends.symbol')
         ->join('holdings', 'transactions.portfolio_id', 'holdings.portfolio_id')
