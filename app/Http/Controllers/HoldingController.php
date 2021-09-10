@@ -15,7 +15,7 @@ class HoldingController extends Controller
      * @param  \App\Models\Holding  $holding
      * @return \Illuminate\Http\Response
      */
-    public function show(Portfolio $portfolio, Holding $holding)
+    public function show(Request $request, Portfolio $portfolio, Holding $holding)
     {
         $holding = $holding->load([
             'market_data',
@@ -24,7 +24,6 @@ class HoldingController extends Controller
                 $q->where('dividends.portfolio_id', $portfolio->id);
             }
             // todo: in other portfolios
-            
         ]);
 
         return view('pages.holdings.show', [

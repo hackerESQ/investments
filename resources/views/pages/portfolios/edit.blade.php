@@ -36,7 +36,14 @@
                         <x-text-area id="notes" :value="$portfolio->notes" class="block mt-1 w-full" type="text" name="notes" />
                     </div>
 
-                    <div class="flex items-center justify-end mt-4">
+                    <div class="mt-4">
+                        <x-jet-label for="users" value="{{ __('Users With Access') }}" />
+                        <x-select id="users" :options="\App\Models\User::get()" :value="$portfolio->users" :multiple="true" itemText="name" class="block mt-1 w-full" name="users[]" required />
+                    </div>
+
+                    <div class="flex items-center justify-between mt-4">
+                        <span>@livewire('delete-portfolio', ['portfolio' => $portfolio])</span>
+
                         <x-jet-button>
                             {{ __('Save Changes') }}
                         </x-jet-button>

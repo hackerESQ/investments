@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Portfolio;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\TransactionImport;
 use App\Http\Requests\TransactionRequest;
 
 class TransactionController extends Controller
@@ -18,7 +16,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        return Transaction::myTransactions()->get();
     }
 
     /**
@@ -28,9 +26,10 @@ class TransactionController extends Controller
      */
     public function create(Request $request, Portfolio $portfolio)
     {
+        $this->authorize('update', $portfolio);
+
         return view('pages.transactions.create_with_portfolio', [
             'portfolio' => $portfolio,
-            'portfolios' => Portfolio::all(),
             'transaction_types' => [['id' => 'BUY', 'title' => __('Buy')], ['id' => 'SELL', 'title' => __('Sell')]],
         ]);
     }
@@ -43,6 +42,8 @@ class TransactionController extends Controller
      */
     public function store(TransactionRequest $request, Portfolio $portfolio)
     {
+        $this->authorize('update', $portfolio);
+
         $transaction = $portfolio->transactions()->create($request->all());
 
         return redirect(route('portfolio.show', $portfolio->id));

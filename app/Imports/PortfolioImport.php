@@ -37,10 +37,13 @@ class PortfolioImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
     public function collection(Collection $transactions)
     {
         foreach ($transactions->sortBy('date') as $row) {
-            $portfolio = Portfolio::where(['id' => $row['portfolio_id']])
+
+            $portfolio = Portfolio::myPortfolios()
+                                ->where(['id' => $row['portfolio_id']])
                                 ->orWhere(['title' => $row['portfolio_id']])
                                 ->firstOr(function () use ($row) {
-                                    return Portfolio::create([
+
+                                    return auth()->user()->portfolios()->create([
                                         'title' => $row['portfolio_id']
                                     ]);
                                 });

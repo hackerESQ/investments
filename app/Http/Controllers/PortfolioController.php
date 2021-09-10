@@ -37,7 +37,7 @@ class PortfolioController extends Controller
      */
     public function store(PortfolioRequest $request)
     {
-        $portfolio = Portfolio::create($request->all());
+        $portfolio = auth()->user()->portfolios()->create($request->all(), ['owner' => true]);
 
         return redirect(route('portfolio.show', $portfolio->id));
     }
@@ -50,6 +50,8 @@ class PortfolioController extends Controller
      */
     public function show(Portfolio $portfolio)
     {
+        $this->authorize('view', $portfolio);
+
         return view('pages.portfolios.show', ['portfolio' => $portfolio]);
     }
 
@@ -61,6 +63,8 @@ class PortfolioController extends Controller
      */
     public function edit(Portfolio $portfolio)
     {
+        $this->authorize('update', $portfolio);
+
         return view('pages.portfolios.edit', ['portfolio' => $portfolio]);
     }
 
@@ -73,7 +77,14 @@ class PortfolioController extends Controller
      */
     public function update(PortfolioRequest $request, Portfolio $portfolio)
     {
-        $portfolio->update($request->all());
+        $this->authorize('update', $portfolio);
+
+        $portfolio->update($request->validated());
+
+        // make sure we don't remove owner
+        $users = array_merge($request->input('users'), [$portfolio->owner_id]);
+
+        $portfolio->users()->sync($users);
 
         return redirect(route('portfolio.show', $portfolio->id));
     }
@@ -86,6 +97,8 @@ class PortfolioController extends Controller
      */
     public function destroy($portfolio)
     {
+        $this->authorize('delete', $portfolio);
+
         $portfolio->delete();
 
         return redirect(route('portfolio.index'));
@@ -95,16 +108,7 @@ class PortfolioController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function importForm(Request $request)
-    {
-        return view('pages.portfolios.import');
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function import(Request $request,)
+    public function import(Request $request)
     {
         $file = $request->file('import')->store('/', 'local');
         

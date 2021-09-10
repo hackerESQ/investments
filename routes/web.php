@@ -23,7 +23,7 @@ Route::redirect('/', '/portfolio', 301);
 Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     // portfolios resource
-    Route::get('portfolio/import', [PortfolioController::class, 'importForm'])->name('portfolio.importForm');
+    Route::view('portfolio/import', 'pages.portfolios.import')->name('portfolio.importForm');
     Route::post('portfolio/import', [PortfolioController::class, 'import'])->name('portfolio.import');
     Route::resource('portfolio', PortfolioController::class);
 
@@ -31,8 +31,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     Route::get('transaction', [TransactionController::class, 'index'])->name('transaction.index');
     Route::get('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'create'])->name('portfolio.transaction.create');
     Route::post('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'store'])->name('portfolio.transaction.store');
-    Route::get('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show');
-    Route::put('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
+    // Route::get('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show');
+    // Route::put('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
 
     // holdings view
     Route::get('portfolio/{portfolio}/holding/{holding}', [HoldingController::class, 'show'])->name('holding.show');

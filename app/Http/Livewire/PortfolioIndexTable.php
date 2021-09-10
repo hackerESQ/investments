@@ -67,7 +67,7 @@ class PortfolioIndexTable extends DataTableComponent
 
     public function query()
     {
-            return Portfolio::query()
+            return Portfolio::query()->myPortfolios()
                 ->withSum('holdings', 'total_cost_basis')
                 ->withSum('holdings', 'dividends_earned')
                 ->withSum('holdings', 'realized_gain_loss_dollars')

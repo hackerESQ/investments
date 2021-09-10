@@ -138,4 +138,10 @@ class Transaction extends Model
     {
         return Dividend::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id'], $this->getAttribute('date'));
     }
+
+    public function scopeMyTransactions() {
+        return $this->whereHas('portfolio', function ($query) {
+            return $query->whereRelation('users', 'id', auth()->user()->id);
+        });
+    }
 }

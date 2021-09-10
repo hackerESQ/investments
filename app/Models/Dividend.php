@@ -59,28 +59,28 @@ class Dividend extends Model
         });
     }
 
-    public static function syncHolding($model) {
+    public static function syncHolding($model) 
+    {
         // check if we got an array, then lets create a dummy model
         if (is_array($model)) {
             $model = (new self)->fill($model);
         }
 
-        // get the holding for a symbol and portfolio
-        $holding = Holding::where([
-            'portfolio_id' => $model->portfolio_id,
-            'symbol' => $model->symbol
-        ])->firstOrFail();
-
         // calculate total dividends received
-        $query = self::where([
+        $dividends = self::where([
             'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol,
         ])->selectRaw('SUM(total_received) AS `dividends_earned`')
         ->first();
 
         // update holding
-        $holding->update([
-            'dividends_earned' => $query->dividends_earned,
+        Holding::where([
+            'portfolio_id' => $model->portfolio_id,
+            'symbol' => $model->symbol
+        ])
+        ->firstOrFail()
+        ->update([
+            'dividends_earned' => $dividends->dividends_earned,
         ]);
     }
 

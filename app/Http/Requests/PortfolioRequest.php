@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Portfolio;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PortfolioRequest extends FormRequest
