@@ -2,6 +2,9 @@
 
 return [
 
+    // hides registration behind a key
+    'registration_key' => '3j92CLG2_chiDvNGHb7fT',
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

@@ -16,6 +16,7 @@ class PortfolioHoldingsTable extends DataTableComponent
     use FormatsMoney;
 
     public $refresh = 1 * 60 * 1000; // poll every 1 minute
+
     public bool $columnSelect = true;
     public string $defaultSortColumn = 'id';
     public bool $reorderEnabled = false;

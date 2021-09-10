@@ -132,7 +132,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // hidden behind a key (see config.auth.registration_key)
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

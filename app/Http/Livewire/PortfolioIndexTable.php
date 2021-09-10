@@ -16,7 +16,7 @@ class PortfolioIndexTable extends DataTableComponent
     public bool $reorderEnabled = false;
     public bool $hideBulkActionsOnEmpty = true;
     public array $bulkActions = [
-        'delete'   => 'Delete',
+//         'delete'   => 'Delete',
     ];
 
     public function columns(): array
@@ -77,16 +77,16 @@ class PortfolioIndexTable extends DataTableComponent
                 ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent');
     }
 
-    public function delete(): void
-    {
-        if ($this->selectedRowsQuery->count() > 0) {
-            Portfolio::whereIn('id', $this->selectedKeys())->delete();
-        }
+//     public function delete(): void
+//     {
+//         if ($this->selectedRowsQuery->count() > 0) {
+//             Portfolio::whereIn('id', $this->selectedKeys())->delete();
+//         }
 
-        $this->selected = [];
+//         $this->selected = [];
 
-        $this->resetBulk();
-    }
+//         $this->resetBulk();
+//     }
 
     public function getTableRowUrl($row): string
     {

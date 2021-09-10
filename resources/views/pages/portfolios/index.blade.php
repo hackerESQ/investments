@@ -4,7 +4,7 @@
             {{ __('Portfolios') }}
 
             <x-link-button class="ml-4" href="{{ route('portfolio.create') }}">
-                {{ __('Create New') }}
+                {{ __('Create New Portfolio') }}
             </x-link-button>
         </h2>
     </x-slot>
