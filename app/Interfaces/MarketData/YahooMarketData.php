@@ -31,9 +31,7 @@ class YahooMarketData implements MarketDataInterface
     {
         $quote = $this->client->getQuote($symbol);
 
-        if (empty($quote)) {
-            return collect();
-        }
+        if (empty($quote)) return collect();
 
         return collect([
             'name' => $quote->getLongName() ?? $quote->getShortName(),
@@ -45,58 +43,26 @@ class YahooMarketData implements MarketDataInterface
     }
 
     public function dividends($symbol, $startDate, $endDate): Collection
-    {   
-        $dividends = $this->client->getHistoricalDividendData($symbol, $startDate, $endDate);
-
-        foreach ($dividends as $dividend) {
-            Holding::select(['symbol', 'portfolio_id'])
-                ->symbol($symbol)
-                ->get()
-                ->each(function($holding) use ($dividend, $symbol) {
-                
-                    $date = $dividend->getDate()->format('Y-m-d H:i:s');
-                    $dividend_amount = $dividend->getDividends();  
-                    $total_quantity_owned = $holding->calculateTotalOwnedOnDate($date);
-
-                    array_push($this->dividends, [
-                        'symbol' => $symbol,
-                        'date' => $date,
-                        'portfolio_id' => $holding->portfolio_id,
-                        'dividend_amount' => $dividend_amount,
-                        'total_quantity_owned' => $total_quantity_owned,
-                        'total_received' => $total_quantity_owned * $dividend_amount,
-                    ]);
-                });
-        }
-
-        return collect($this->dividends);
+    {
+        return collect($this->client->getHistoricalDividendData($symbol, $startDate, $endDate))
+                        ->map(function($dividend) use ($symbol) {
+                            return [
+                                'symbol' => $symbol,
+                                'date' => $dividend->getDate()->format('Y-m-d H:i:s'),
+                                'dividend_amount' => $dividend->getDividends(),
+                            ];
+                        });
     }
 
     public function splits($symbol, $startDate, $endDate): Collection
     {   
-        $splits = $this->client->getHistoricalSplitData($symbol, $startDate, $endDate);
-
-        foreach ($splits as $split) {
-            Holding::select(['symbol', 'portfolio_id'])
-                ->symbol($symbol)
-                ->get()
-                ->each(function($holding) use ($split, $symbol) {
-                
-                    $date = $split->getDate()->format('Y-m-d H:i:s');
-                    $split_amount = explode(':', $split->getStockSplits())[0];
-                    $old_quantity_owned = $holding->calculateTotalOwnedOnDate($date);
-
-                    array_push($this->splits, [
-                        'symbol' => $symbol,
-                        'date' => $date,
-                        'portfolio_id' => $holding->portfolio_id,
-                        'split_amount' => $split_amount,
-                        'old_quantity_owned' => $old_quantity_owned,
-                        'new_quantity_owned' => $old_quantity_owned * $split_amount,
-                    ]);
-                });
-        }
-
-        return collect($this->splits);
+        return collect($this->client->getHistoricalSplitData($symbol, $startDate, $endDate))
+                        ->map(function($split) use ($symbol) {
+                            return [
+                                'symbol' => $symbol,
+                                'date' => $split->getDate()->format('Y-m-d H:i:s'),
+                                'split_amount' => $split->getStockSplits(),
+                            ];
+                        });
     }
 }

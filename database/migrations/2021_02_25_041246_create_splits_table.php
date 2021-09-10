@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDividendsTable extends Migration
+class CreateSplitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateDividendsTable extends Migration
      */
     public function up()
     {
-        Schema::create('dividends', function (Blueprint $table) {
+        Schema::create('splits', function (Blueprint $table) {
             $table->id();
             $table->date('date');
             $table->string('symbol');
@@ -29,6 +29,6 @@ class CreateDividendsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dividends');
+        Schema::dropIfExists('splits');
     }
 }

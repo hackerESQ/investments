@@ -20,10 +20,7 @@ class Dividend extends Model
     protected $fillable = [
         'symbol',
         'date',
-        'portfolio_id',
         'dividend_amount',
-        'total_quantity_owned',
-        'total_received',
     ];
 
     /**
@@ -42,54 +39,43 @@ class Dividend extends Model
         'date' => 'datetime',
     ];
 
-    /**
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saved(function ($model) {
-            static::syncHolding($model);
-        });
-
-        static::deleted(function ($model) {
-            static::syncHolding($model);
-        });
-    }
-
-    public static function syncHolding($model) 
+    public static function syncHoldings($model) 
     {
         // check if we got an array, then lets create a dummy model
         if (is_array($model)) {
             $model = (new self)->fill($model);
         }
 
-        // calculate total dividends received
+        // pull dividend data joined with holdings/transactions
         $dividends = self::where([
-            'portfolio_id' => $model->portfolio_id,
-            'symbol' => $model->symbol,
-        ])->selectRaw('SUM(total_received) AS `dividends_earned`')
-        ->first();
+            'dividends.symbol' => $model->symbol,
+        ])->select(['holdings.portfolio_id', 'dividends.date', 'dividends.symbol', 'dividends.dividend_amount'])
+        ->selectRaw('@purchased:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date) AND holdings.portfolio_id = transactions.portfolio_id ) AS `qty_purchases`')
+        ->selectRaw('@sold:=(SELECT coalesce(SUM(quantity),0) FROM transactions WHERE transactions.transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND date(transactions.date) <= date(dividends.date)  AND holdings.portfolio_id = transactions.portfolio_id ) AS `qty_sold`')
+        ->selectRaw('@owned:=(@purchased - @sold) AS `qty_owned`')
+        ->selectRaw('@dividends_received:=(@owned * dividends.dividend_amount) AS `dividends_received`')
+        ->join('transactions', 'transactions.symbol', 'dividends.symbol')
+        ->join('holdings', 'transactions.portfolio_id', 'holdings.portfolio_id')
+        ->groupBy(['holdings.portfolio_id', 'dividends.date', 'dividends.symbol', 'dividends.dividend_amount'])
+        ->get();
 
-        // update holding
+        // iterate through holdings and update 
         Holding::where([
-            'portfolio_id' => $model->portfolio_id,
             'symbol' => $model->symbol
-        ])
-        ->firstOrFail()
-        ->update([
-            'dividends_earned' => $dividends->dividends_earned,
-        ]);
+        ])->get()
+        ->each(function ($holding) use ($dividends) {
+            $holding->update([
+                'dividends_earned' => $dividends->where('portfolio_id', $holding->portfolio_id)->sum('dividends_received')
+            ]);
+        });
     }
 
-    public static function getDividendData(string $symbol, int $portfolio_id, \DateTimeInterface $start_date = null) 
+    public static function getDividendData(string $symbol, \DateTimeInterface $start_date = null) 
     {
         // most recent dividend date for given symbol and portfolio (last dividend date)
         $last_dividend_date = self::where([
                 'symbol' => $symbol, 
-                'portfolio_id' => $portfolio_id
+                // 'portfolio_id' => $portfolio_id
             ])->latest('date')->first()?->date->addHours(48);
 
         // start date not provided, try to get last dividend date as starting point
@@ -106,55 +92,20 @@ class Dividend extends Model
         if (!$start_date) {
             throw new HttpException(500, 'No valid start date provided');
         }
-
-        // if start date is less than last dividend date, then 
-        // we only need to UPDATE existing records (dont want to pull in duplicates)
-        if (Carbon::parse($start_date)->lessThan($last_dividend_date)) {
-            // update each existing dividend
-            $dividend_data = self::where([
-                'symbol' => $symbol,
-                'portfolio_id' => $portfolio_id,
-            ])
-            ->whereBetween('date', [$start_date, $last_dividend_date])
-            ->get()
-            ->each(function($dividend) {
-                
-                $total_quantity_owned = $dividend->getHolding()->calculateTotalOwnedOnDate($dividend->date);
-
-                $dividend->fill([
-                    'total_quantity_owned' => $total_quantity_owned,
-                    'total_received' => $total_quantity_owned * $dividend->dividend_amount
-                ]);
-
-                $dividend->saveQuietly(); // will be syncing holdings later
-            });
     
-            // do we need to add any missing dividends that pre-date our records?
-            $first_dividend_date = self::where([
-                'symbol' => $symbol, 
-                'portfolio_id' => $portfolio_id
-            ])->oldest('date')->first()?->date;
+        // fetch new dividend data
+        $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
 
-            if (Carbon::parse($start_date)->lessThan($first_dividend_date)) {
-                // load missing as a supplement
-                $supplement = app(MarketDataInterface::class)->dividends($symbol, $start_date, $first_dividend_date);
-
-                (new self)->insert($supplement->toArray());
-            }
-        } else {
-            // fetch new dividend data
-            $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
-
-            // add records
-            (new self)->insert($dividend_data->toArray());
-        }
-
-        // no dividends, exit
+        // no dividends, nothing to sync, let's exit...
         if ($dividend_data->isEmpty()) {
             return collect();
         }
 
-        self::syncHolding($dividend_data->last());
+        // add records
+        (new self)->insert($dividend_data->toArray());
+
+        // sync to holdings
+        self::syncHoldings($dividend_data->last());
 
         return $dividend_data;
     }
@@ -163,7 +114,7 @@ class Dividend extends Model
         return $this->hasMany(Holding::class, 'symbol', 'symbol');
     }
 
-    public function getHolding() {
-        return Holding::symbol($this->attributes['symbol'])->portfolio($this->attributes['portfolio_id'])->first();
+    public function transactions() {
+        return $this->hasMany(Transaction::class, 'symbol', 'symbol');
     }
 }

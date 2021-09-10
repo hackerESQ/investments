@@ -7,6 +7,7 @@ use App\Http\Controllers\{
     TransactionController
 };
 use App\Interfaces\MarketData\MarketDataInterface;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,10 +40,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     Route::get('portfolio/{portfolio}/holding/{holding}', [HoldingController::class, 'show'])->name('holding.show');
 
     Route::get('test', function(){
-        return app(MarketDataInterface::class)->splits(
-            "AAPL",
-            new \DateTime("-5 years"),
-            new \DateTime("today")
-        );
+
+        
     });
 });

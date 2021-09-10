@@ -136,7 +136,7 @@ class Transaction extends Model
 
     public function refreshDividends() 
     {
-        return Dividend::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id'], $this->getAttribute('date'));
+        return Dividend::getDividendData($this->attributes['symbol'], $this->getAttribute('date'));
     }
 
     public function scopeMyTransactions() {
