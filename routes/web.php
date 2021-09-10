@@ -6,6 +6,7 @@ use App\Http\Controllers\{
     PortfolioController,
     TransactionController
 };
+use App\Interfaces\MarketData\MarketDataInterface;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,4 +37,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     // holdings view
     Route::get('portfolio/{portfolio}/holding/{holding}', [HoldingController::class, 'show'])->name('holding.show');
+
+    Route::get('test', function(){
+        return app(MarketDataInterface::class)->splits(
+            "AAPL",
+            new \DateTime("-5 years"),
+            new \DateTime("today")
+        );
+    });
 });

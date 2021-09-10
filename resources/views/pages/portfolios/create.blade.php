@@ -2,7 +2,12 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Create Portfolio') }}
+
+            <x-link-button class="ml-4" href="{{ route('portfolio.index') }}">
+                {{ __('Back to home') }}
+            </x-link-button>
         </h2>
+        
     </x-slot>
 
     <div class="py-12">

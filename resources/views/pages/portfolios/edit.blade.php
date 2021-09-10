@@ -38,7 +38,7 @@
 
                     <div class="mt-4">
                         <x-jet-label for="users" value="{{ __('Users With Access') }}" />
-                        <x-select id="users" :options="\App\Models\User::get()" :value="$portfolio->users" :multiple="true" itemText="name" class="block mt-1 w-full" name="users[]" required />
+                        <x-select :mandatorySelection="['pivot.owner', 1, '(owner)']"  id="users" :options="\App\Models\User::get()" :value="$portfolio->users" :multiple="true" itemText="name" class="block mt-1 w-full" name="users[]" required />
                     </div>
 
                     <div class="flex items-center justify-between mt-4">

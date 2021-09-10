@@ -8,8 +8,14 @@ use Scheb\YahooFinanceApi\ApiClientFactory;
 
 class YahooMarketData implements MarketDataInterface
 {
+    // api client
     public $client;
+
+    // scratch pad for dividends
     public $dividends = [];
+
+    // scratch pad for splits
+    public $splits = [];
 
     public function __construct() {
         // create yahoo finance client factory
@@ -64,5 +70,33 @@ class YahooMarketData implements MarketDataInterface
         }
 
         return collect($this->dividends);
+    }
+
+    public function splits($symbol, $startDate, $endDate): Collection
+    {   
+        $splits = $this->client->getHistoricalSplitData($symbol, $startDate, $endDate);
+
+        foreach ($splits as $split) {
+            Holding::select(['symbol', 'portfolio_id'])
+                ->symbol($symbol)
+                ->get()
+                ->each(function($holding) use ($split, $symbol) {
+                
+                    $date = $split->getDate()->format('Y-m-d H:i:s');
+                    $split_amount = explode(':', $split->getStockSplits())[0];
+                    $old_quantity_owned = $holding->calculateTotalOwnedOnDate($date);
+
+                    array_push($this->splits, [
+                        'symbol' => $symbol,
+                        'date' => $date,
+                        'portfolio_id' => $holding->portfolio_id,
+                        'split_amount' => $split_amount,
+                        'old_quantity_owned' => $old_quantity_owned,
+                        'new_quantity_owned' => $old_quantity_owned * $split_amount,
+                    ]);
+                });
+        }
+
+        return collect($this->splits);
     }
 }
