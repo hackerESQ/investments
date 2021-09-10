@@ -21,7 +21,8 @@ class HoldingController extends Controller
             'market_data',
             'transactions', 
             'dividends' => function ($q) use ($portfolio) {
-                $q->where('dividends.portfolio_id', $portfolio->id);
+                // todo: use some kind of date filter based on transactions
+                // $q->where('dividends.portfolio_id', $portfolio->id);
             }
             // todo: in other portfolios
         ]);

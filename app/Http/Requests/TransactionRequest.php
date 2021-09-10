@@ -61,7 +61,7 @@ class TransactionRequest extends FormRequest
 
     public function passedValidation() 
     {
-        // move cost basis to sale price if sale transaction
+        // if sale, move cost basis to sale price 
         if ($this->input('transaction_type') == 'SELL') {
 
             $this->merge([

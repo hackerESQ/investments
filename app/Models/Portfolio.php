@@ -59,10 +59,6 @@ class Portfolio extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function dividends() {
-        return $this->hasMany(Dividend::class);
-    }
-
     public function scopeMyPortfolios() {
         return $this->whereRelation('users', 'id', auth()->user()->id);
     }
