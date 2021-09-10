@@ -73,10 +73,11 @@ class Dividend extends Model
     public static function getDividendData(string $symbol, \DateTimeInterface $start_date = null) 
     {
         // most recent dividend date for given symbol and portfolio (last dividend date)
-        $last_dividend_date = self::where([
-                'symbol' => $symbol, 
-                // 'portfolio_id' => $portfolio_id
-            ])->latest('date')->first()?->date->addHours(48);
+        $last_dividend_date = self::where(['symbol' => $symbol])
+                                    ->latest('date')
+                                    ->first()
+                                    ?->date
+                                    ->addHours(48);
 
         // start date not provided, try to get last dividend date as starting point
         if (!$start_date) {
@@ -93,12 +94,12 @@ class Dividend extends Model
             throw new HttpException(500, 'No valid start date provided');
         }
     
-        // fetch new dividend data
-        $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
+        $dividend_data = collect();
 
-        // no dividends, nothing to sync, let's exit...
-        if ($dividend_data->isEmpty()) {
-            return collect();
+        // are we out of date?
+        if ($start_date->greaterThan($last_dividend_date)) {
+            // fetch new dividend data
+            $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
         }
 
         // add records
