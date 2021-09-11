@@ -37,11 +37,19 @@ class Dividend extends Model
      */
     protected $casts = [
         'date' => 'datetime',
+        'first_date' => 'datetime',
+        'last_date' => 'datetime',
     ];
 
-    public static function syncHoldings($model) 
+    /**
+     * Syncs all holdings of symbol with dividend data
+     *
+     * @param array|self $model
+     * @return void
+     */
+    public static function syncHoldings(mixed $model) 
     {
-        // check if we got an array, then lets create a dummy model
+        // check if we got an array, if yes then lets create a dummy model
         if (is_array($model)) {
             $model = (new self)->fill($model);
         }
@@ -60,53 +68,74 @@ class Dividend extends Model
         ->get();
 
         // iterate through holdings and update 
-        Holding::where([
-            'symbol' => $model->symbol
-        ])->get()
-        ->each(function ($holding) use ($dividends) {
-            $holding->update([
-                'dividends_earned' => $dividends->where('portfolio_id', $holding->portfolio_id)->sum('dividends_received')
-            ]);
-        });
+        Holding::where(['symbol' => $model->symbol])
+            ->get()
+            ->each(function ($holding) use ($dividends) {
+                $holding->update([
+                    'dividends_earned' => $dividends->where('portfolio_id', $holding->portfolio_id)->sum('dividends_received')
+                ]);
+            });
     }
 
-    public static function getDividendData(string $symbol, \DateTimeInterface $start_date = null) 
+    /**
+     * Grab new dividend data
+     *
+     * @param string $symbol
+     * @param \DateTimeInterface|null $start_date
+     * @return void
+     */
+    public static function getDividendData(string $symbol) 
     {
-        // most recent dividend date for given symbol and portfolio (last dividend date)
-        $last_dividend_date = self::where(['symbol' => $symbol])
-                                    ->latest('date')
-                                    ->first()
-                                    ?->date
-                                    ->addHours(48);
+        // some dividend meta data
+        $dividends = self::where(['symbol' => $symbol])
+            ->selectRaw('COUNT(symbol) as total_dividends')
+            ->selectRaw('MIN(date) as first_date')
+            ->selectRaw('MAX(date) as last_date')
+            ->get()
+            ->first();
 
-        // start date not provided, try to get last dividend date as starting point
-        if (!$start_date) {
-            $start_date = $last_dividend_date;
-        }
+        $transactions = Transaction::where(['symbol' => $symbol])
+                ->selectRaw('MIN(date) as first_date')
+                ->selectRaw('MAX(date) as last_date')
+                ->get()
+                ->first();
 
-        // no dividends on record, try to use oldest transaction date
-        if (!$start_date) {
-            $start_date = Transaction::where('symbol', $symbol)->oldest('date')->first()?->date;
-        }
-
-        // welp... let's fail early
-        if (!$start_date) {
-            throw new HttpException(500, 'No valid start date provided');
-        }
-    
         $dividend_data = collect();
 
-        // are we out of date?
-        if ($start_date->greaterThan($last_dividend_date)) {
-            // fetch new dividend data
-            $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, now());
+        // need to fill in earlier dividends because of a new transaction
+        if ($transactions->first_date->lessThan($dividends->first_date)) {
+
+            $start_date = $transactions->first_date;
+            $end_date = $dividends->first_date->subHours(48);
+        } 
+
+        // need to populate newer dividend data because of a new dividend
+        if ($dividends->last_date?->lessThan($transactions->last_date)) {
+
+            $start_date = $dividends->last_date->addHours(48);
+            $end_date =  now();
         }
 
-        // add records
-        (new self)->insert($dividend_data->toArray());
+        // need to populate all dividend data because it didnt exist before
+        if ($dividends->total_dividends == 0) {
 
-        // sync to holdings
-        self::syncHoldings($dividend_data->last());
+            $start_date = $transactions->first_date;
+            $end_date = now();
+        }
+
+        // get some data
+        if ($start_date && $end_date) {
+            $dividend_data = app(MarketDataInterface::class)->dividends($symbol, $start_date, $end_date);
+        }
+
+        // ah, we found some dividends...
+        if ($dividend_data->isNotEmpty()) {
+            // insert records
+            (new self)->insert($dividend_data->toArray());
+
+            // sync to holdings
+            self::syncHoldings($dividend_data->last());
+        }
 
         return $dividend_data;
     }

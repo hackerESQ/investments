@@ -61,7 +61,7 @@ class YahooMarketData implements MarketDataInterface
                             return [
                                 'symbol' => $symbol,
                                 'date' => $split->getDate()->format('Y-m-d H:i:s'),
-                                'split_amount' => $split->getStockSplits(),
+                                'split_amount' => explode(':', $split->getStockSplits())[0],
                             ];
                         });
     }

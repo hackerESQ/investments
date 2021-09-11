@@ -59,7 +59,8 @@ class User extends Authenticatable
         'profile_photo_url',
     ];
 
-    public function portfolios() {
+    public function portfolios()
+    {
         return $this->belongsToMany(Portfolio::class)->withPivot('owner');
     }
 }

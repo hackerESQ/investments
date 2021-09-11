@@ -32,7 +32,8 @@ class Holding extends Model
      *
      * @return void
      */
-    public function market_data() {
+    public function market_data() 
+    {
         return $this->hasOne(MarketData::class, 'symbol', 'symbol');
     }
 
@@ -41,7 +42,8 @@ class Holding extends Model
      *
      * @return void
      */
-    public function transactions() {
+    public function transactions() 
+    {
         return $this->hasMany(Transaction::class, 'symbol', 'symbol');
     }
 
@@ -50,33 +52,23 @@ class Holding extends Model
      *
      * @return void
      */
-    public function dividends() {
+    public function dividends() 
+    {
         return $this->hasMany(Dividend::class, 'symbol', 'symbol');
     }
 
-    public function scopePortfolio($query, $arg)
+    public function scopePortfolio($query, $portfolio)
     {
-        return $query->where('portfolio_id', $arg);
+        return $query->where('portfolio_id', $portfolio);
     }
 
-    public function scopeSymbol($query, $arg)
+    public function scopeSymbol($query, $symbol)
     {
-        return $query->where('symbol', $arg);
+        return $query->where('symbol', $symbol);
     }
 
-    public function calculateTotalOwnedOnDate($date) 
+    public function refreshDividends() 
     {
-        return Transaction::select(['symbol', 'portfolio_id', 'transaction_type', 'quantity'])
-            ->portfolio($this->attributes['portfolio_id'])
-            ->symbol($this->attributes['symbol'])
-            ->whereDate('date', '<', $date)
-            ->get()
-            ->reduce(function ($carry, $item) {
-                return $item->transaction_type == 'BUY' ? $carry + $item->quantity : $carry - $item->quantity;
-            });
-    }
-
-    public function refreshDividends() {
-        return Dividend::getDividendData($this->attributes['symbol'], $this->attributes['portfolio_id']);
+        return Dividend::getDividendData($this->attributes['symbol']);
     }
 }

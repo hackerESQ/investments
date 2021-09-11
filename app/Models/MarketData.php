@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class MarketData extends Model
 {
@@ -25,10 +26,31 @@ class MarketData extends Model
         'market_value',
         'fifty_two_week_high',
         'fifty_two_week_low',
+        'splits_synced_to_holdings_at',
+        'dividends_last_updated_at',
     ];
 
-    public function refreshMarketData() {
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'splits_synced_to_holdings_at' => 'datetime',
+        'dividends_last_updated_at' => 'datetime',
+    ];
 
+    public static function setSplitsHoldingSynced($symbol) 
+    {
+        $market_data = self::where('symbol', $symbol)->get()->first();
+
+        $market_data->splits_synced_to_holdings_at = now();
+
+        $market_data->save();
+    }
+
+    public function refreshMarketData() 
+    {
         return static::getMarketData($this->attributes['symbol']);
 
     }
@@ -53,7 +75,8 @@ class MarketData extends Model
         return $market_data;
     }
 
-    public function holdings() {
+    public function holdings() 
+    {
         return $this->hasMany(Holding::class, 'symbol', 'symbol');
     }
 }

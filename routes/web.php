@@ -41,6 +41,28 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     Route::get('test', function(){
 
-        
+
+
+        \App\Models\Split::syncTransactions(['symbol' => 'AAPL']);
+
+
+
+
+
+
+
+        // $test = \App\Models\Transaction::where('symbol', 'DSI')
+        // ->selectRaw('MIN(date) as first_transaction')
+        // ->first();
+
+        // return (new DateTime($test->first_transaction))->format('y-m-d');
+
+
+        // $date = \App\Models\Dividend::where(['symbol' => 'DSI'])
+        //     ->selectRaw('MIN(date) as first_dividend_date')
+        //     ->selectRaw('MAX(date) as last_dividend_date')
+        //     ->get();
+            
+        // $date->get('first_dividend');
     });
 });

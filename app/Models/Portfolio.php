@@ -47,23 +47,28 @@ class Portfolio extends Model
      */
     protected $appends = ['owner_id'];
 
-    public function users() {
+    public function users()
+    {
         return $this->belongsToMany(User::class)->withPivot('owner');
     }
 
-    public function holdings() {
+    public function holdings()
+    {
         return $this->hasMany(Holding::class, 'portfolio_id', 'id');
     }
 
-    public function transactions() {
+    public function transactions()
+    {
         return $this->hasMany(Transaction::class);
     }
 
-    public function scopeMyPortfolios() {
+    public function scopeMyPortfolios()
+    {
         return $this->whereRelation('users', 'id', auth()->user()->id);
     }
 
-    public function getOwnerIdAttribute() {
+    public function getOwnerIdAttribute()
+    {
         return $this->users()->where('owner', 1)->first()?->id;
     }
 }

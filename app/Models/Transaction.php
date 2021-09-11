@@ -39,6 +39,8 @@ class Transaction extends Model
      */
     protected $casts = [
         'date' => 'datetime',
+        'first_date' => 'datetime',
+        'last_date' => 'datetime',
     ];
 
     /**
@@ -96,18 +98,11 @@ class Transaction extends Model
 
         $holding->save();
 
-        // load market data while we're here todo: should 'force' this rather than wait for refresh
-        MarketData::getMarketData($model->symbol);
+        // load market data while we're here
+        $model->refreshMarketData();
 
-        // load dividends data in queue after holding is created
-        dispatch(function () use ($model) {
-            $model->refreshDividends();
-        });
-    }
-
-    public function portfolio()
-    {
-        return $this->belongsTo(Portfolio::class);
+        // sync dividends to holding
+        $model->syncDividendsToHolding();
     }
 
     public function setSymbolAttribute($value) 
@@ -120,7 +115,8 @@ class Transaction extends Model
      *
      * @return void
      */
-    public function market_data() {
+    public function market_data()
+    {
         return $this->hasOne(MarketData::class, 'symbol', 'symbol');
     }
 
@@ -134,14 +130,25 @@ class Transaction extends Model
         return $query->where('symbol', $symbol);
     }
 
-    public function refreshDividends() 
+    public function scopeMyTransactions()
     {
-        return Dividend::getDividendData($this->attributes['symbol'], $this->getAttribute('date'));
-    }
-
-    public function scopeMyTransactions() {
         return $this->whereHas('portfolio', function ($query) {
             return $query->whereRelation('users', 'id', auth()->user()->id);
         });
+    }
+
+    public function refreshMarketData() 
+    {
+        return MarketData::getMarketData($this->attributes['symbol']);
+    }
+    
+    public function syncDividendsToHolding() 
+    {
+        return Dividend::syncHoldings(['symbol' => $this->attributes['symbol']]);
+    }
+
+    public function refreshDividends() 
+    {
+        return Dividend::getDividendData($this->attributes['symbol']);
     }
 }

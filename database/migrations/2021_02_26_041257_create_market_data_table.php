@@ -19,6 +19,7 @@ class CreateMarketDataTable extends Migration
             $table->float('market_value', 10, 3);
             $table->float('fifty_two_week_low', 10, 3);
             $table->float('fifty_two_week_high', 10, 3);
+            $table->timestamp('splits_synced_to_holdings_at')->nullable();
             $table->timestamps();
         });
     }

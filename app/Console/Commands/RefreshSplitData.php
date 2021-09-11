@@ -2,25 +2,25 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Split;
 use App\Models\Holding;
-use App\Models\Dividend;
 use Illuminate\Console\Command;
 
-class RefreshDividendData extends Command
+class RefreshSplitData extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dividend-data:refresh';
+    protected $signature = 'split-data:refresh';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Refresh dividend data from data provider';
+    protected $description = 'Refresh split data from data provider';
 
     /**
      * Create a new command instance.
@@ -39,11 +39,11 @@ class RefreshDividendData extends Command
      */
     public function handle()
     {
-        $holdings = Holding::where('quantity', '>', 0)->distinct()->get(['symbol']);
+        $holdings = Holding::distinct()->get(['symbol']);
 
         foreach ($holdings as $holding) {
             $this->line('Refreshing ' . $holding->symbol);
-            Dividend::getDividendData($holding->symbol);
+            Split::getSplitData($holding->symbol);
         }
     }
 }
