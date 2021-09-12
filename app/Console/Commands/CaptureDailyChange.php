@@ -42,7 +42,7 @@ class CaptureDailyChange extends Command
 
             $this->line('Capturing daily change for ' . $user->name);
 
-            $portfolios = $user->portfolios()->with(['holdings.market_data'])->get();
+            $portfolios = $user->portfolios()->withoutWishlists()->with(['holdings.market_data'])->get();
 
             $total_cost_basis = $portfolios->reduce(function ($carry, $portfolio) {
                 return $carry + $portfolio->holdings->sum('total_cost_basis');

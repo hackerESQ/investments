@@ -17,6 +17,7 @@ class CreatePortfoliosTable extends Migration
             $table->id();
             $table->string('title');
             $table->text('notes')->nullable();
+            $table->boolean('wishlist')->default(false);
             $table->timestamps();
         });
     }

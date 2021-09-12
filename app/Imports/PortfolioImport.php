@@ -23,7 +23,7 @@ class PortfolioImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                                 ->orWhere(['title' => $row['portfolio_id']])
                                 ->firstOr(function () use ($row) {
 
-                                    return auth()->user()->portfolios()->create([
+                                    return Portfolio::create([
                                         'title' => $row['portfolio_id']
                                     ]);
                                 });

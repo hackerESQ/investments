@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Portfolio extends Model
 {
@@ -16,8 +16,22 @@ class Portfolio extends Model
      */
     protected $fillable = [
         'title',
-        'notes'
+        'notes',
+        'wishlist',
     ];
+
+     /**
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::saved(function ($model) {
+            self::syncUsers($model);
+        });
+    }
 
     /**
      * The attributes that should be hidden for arrays.
@@ -67,8 +81,26 @@ class Portfolio extends Model
         return $this->whereRelation('users', 'id', auth()->user()->id);
     }
 
+    public function scopeWithoutWishlists() 
+    {
+        return $this->where(['wishlist' => false]);
+    }
+
     public function getOwnerIdAttribute()
     {
         return $this->users()->where('owner', 1)->first()?->id;
+    }
+
+    public static function syncUsers(self $model) {
+        // make sure we don't remove owner access
+        $user_id[$model->owner_id ?? auth()->user()->id] = ['owner' => true];
+
+        // add other users
+        foreach(request()->users ?? [] as $id) {
+            $user_id[$id] = ['owner' => false];
+        };
+
+        // save
+        $model->users()->sync($user_id);
     }
 }

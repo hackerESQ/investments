@@ -15,9 +15,6 @@ class PortfolioIndexTable extends DataTableComponent
     public string $defaultSortColumn = 'id';
     public bool $reorderEnabled = false;
     public bool $hideBulkActionsOnEmpty = true;
-    public array $bulkActions = [
-//         'delete'   => 'Delete',
-    ];
 
     public function columns(): array
     {
@@ -32,33 +29,27 @@ class PortfolioIndexTable extends DataTableComponent
             Column::make('Total Cost Basis', 'holdings_sum_total_cost_basis')
                     ->format(function ($value, $column, $row) {
                         return $this->formatMoney($value);
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Total Market Value', 'total_market_value')
                     ->format(function ($value, $column, $row) {
                         return $this->formatMoney($value);
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Market Gain / Loss ($)', 'total_gain_loss_dollars')
                     ->format(function ($value, $column, $row) {
                         return $this->formatMoney($value);
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Market Gain / Loss (%)', 'total_gain_loss_percent')
                     ->format(function ($value, $column, $row) {
                         return number_format($value, 2) . "%";
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Realized Gain / Loss ($)', 'holdings_sum_realized_gain_loss_dollars')
                     ->format(function ($value, $column, $row) {
                             return $this->formatMoney($value);
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Dividends Earned', 'holdings_sum_dividends_earned')
                     ->format(function ($value, $column, $row) {
                             return $this->formatMoney($value);
-                    })
-                    ->sortable(),
+                    })->sortable(),
             Column::make('Updated At')
                     ->sortable(),
             Column::make('Created At')
@@ -77,17 +68,6 @@ class PortfolioIndexTable extends DataTableComponent
                 ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
                 ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent');
     }
-
-//     public function delete(): void
-//     {
-//         if ($this->selectedRowsQuery->count() > 0) {
-//             Portfolio::whereIn('id', $this->selectedKeys())->delete();
-//         }
-
-//         $this->selected = [];
-
-//         $this->resetBulk();
-//     }
 
     public function getTableRowUrl($row): string
     {

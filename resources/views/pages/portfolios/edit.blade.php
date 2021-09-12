@@ -41,6 +41,22 @@
                         <x-select :mandatorySelection="['pivot.owner', 1, '(owner)']"  id="users" :options="\App\Models\User::get()" :value="$portfolio->users" :multiple="true" itemText="name" class="block mt-1 w-full" name="users[]" />
                     </div>
 
+                    <div class="mt-4">
+                        <x-jet-label for="wishlist">
+                            <div class="flex items-center">
+                                @if ($portfolio->wishlist)
+                                    <x-jet-checkbox name="wishlist" id="wishlist" value="1" checked />
+                                @else
+                                    <x-jet-checkbox name="wishlist" id="wishlist" value="1" />
+                                @endif
+    
+                                <div class="ml-2">
+                                    {!! __('Treat this portfolio as a "wishlist" (holdings will be excluded from realized gains, unrealized gains, or dividends)') !!}
+                                </div>
+                            </div>
+                        </x-jet-label>
+                    </div>
+
                     <div class="flex items-center justify-between mt-4">
                         <span>@livewire('delete-portfolio', ['portfolio' => $portfolio])</span>
 

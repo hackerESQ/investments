@@ -37,7 +37,7 @@ class PortfolioController extends Controller
      */
     public function store(PortfolioRequest $request)
     {
-        $portfolio = auth()->user()->portfolios()->create($request->all(), ['owner' => true]);
+        $portfolio = Portfolio::create($request->validated());
 
         return redirect(route('portfolio.show', $portfolio->id));
     }
@@ -80,11 +80,6 @@ class PortfolioController extends Controller
         $this->authorize('update', $portfolio);
 
         $portfolio->update($request->validated());
-
-        // make sure we don't remove owner
-        $users = array_merge($request->input('users', []), [$portfolio->owner_id]);
-
-        $portfolio->users()->sync($users);
 
         return redirect(route('portfolio.show', $portfolio->id));
     }

@@ -35,6 +35,18 @@
                         <x-text-area id="notes" class="block mt-1 w-full" type="text" name="notes" />
                     </div>
 
+                    <div class="mt-4">
+                        <x-jet-label for="wishlist">
+                            <div class="flex items-center">
+                                <x-jet-checkbox name="wishlist" id="wishlist" value="1" />
+    
+                                <div class="ml-2">
+                                    {!! __('Treat this portfolio as a "wishlist" (holdings will be excluded from realized gains, unrealized gains, or dividends)') !!}
+                                </div>
+                            </div>
+                        </x-jet-label>
+                    </div>
+
                     <div class="flex items-center justify-end mt-4">
                         <x-jet-button>
                             {{ __('Create Portfolio') }}

@@ -8,6 +8,16 @@ use Illuminate\Foundation\Http\FormRequest;
 class PortfolioRequest extends FormRequest
 {
     /**
+     * Prepare for validation
+     *
+     * @return bool
+     */
+    public function prepareForValidation()
+    {
+        $this->merge(['wishlist' => $this->input('wishlist', false)]);
+    }
+
+    /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
@@ -27,6 +37,8 @@ class PortfolioRequest extends FormRequest
         return [
             'title' => ['required'],
             'notes' => ['nullable', 'string'],
+            'users' => ['nullable', 'array'],
+            'wishlist' => ['nullable', 'boolean'],
         ];
     }
 }
