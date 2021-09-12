@@ -17,7 +17,7 @@ class CreateDividendsTable extends Migration
             $table->id();
             $table->date('date');
             $table->string('symbol');
-            $table->float('dividend_amount',10,3);
+            $table->float('dividend_amount', 12, 4);
             $table->timestamps();
         });
     }

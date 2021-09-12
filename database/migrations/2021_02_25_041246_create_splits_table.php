@@ -17,7 +17,7 @@ class CreateSplitsTable extends Migration
             $table->id();
             $table->date('date');
             $table->string('symbol');
-            $table->float('split_amount', 10, 3);
+            $table->float('split_amount', 12, 4);
             $table->timestamps();
         });
     }

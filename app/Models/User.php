@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Portfolio::class)->withPivot('owner');
     }
+
+    public function daily_changes()
+    {
+        return $this->hasMany(DailyChange::class);
+    }
 }

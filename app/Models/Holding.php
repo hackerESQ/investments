@@ -28,6 +28,15 @@ class Holding extends Model
     ];
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'market_data_age' => 'datetime',
+    ];
+
+    /**
      * get market data for holding
      *
      * @return void

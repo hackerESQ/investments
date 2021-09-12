@@ -28,7 +28,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command(RefreshMarketData::class)->everyThirtyMinutes();
         $schedule->command(RefreshDividendData::class)->daily();
-        $schedule->command(RefreshSplitData::class)->weekly();
+        $schedule->command(CaptureDailyChange::class)->daily();
+        $schedule->command(RefreshSplitData::class)->monthly();
     }
 
     /**

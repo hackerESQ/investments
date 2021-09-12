@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Dividend extends Model
 {

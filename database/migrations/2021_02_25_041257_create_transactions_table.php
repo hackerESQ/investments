@@ -18,9 +18,9 @@ class CreateTransactionsTable extends Migration
             $table->string('symbol');
             $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->string('transaction_type');
-            $table->float('quantity', 10, 3);
-            $table->float('cost_basis', 10, 3);
-            $table->float('sale_price', 10, 3)->nullable();
+            $table->float('quantity', 12, 4);
+            $table->float('cost_basis', 12, 4);
+            $table->float('sale_price', 12, 4)->nullable();
             $table->date('date');
             $table->timestamps();
         });

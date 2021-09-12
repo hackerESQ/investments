@@ -17,7 +17,6 @@ class PortfolioUser extends Migration
             $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->boolean('owner')->default(false);
-
             $table->primary(['portfolio_id', 'user_id']);
         });
     }

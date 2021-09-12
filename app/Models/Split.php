@@ -3,12 +3,10 @@
 namespace App\Models;
 
 use App\Models\Transaction;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Interfaces\MarketData\MarketDataInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Split extends Model
 {
@@ -49,7 +47,7 @@ class Split extends Model
      * @param string $symbol
      * @return void
      */
-    public static function syncTransactions($symbol) 
+    public static function syncToTransactions($symbol) 
     {
         // pull split data joined 
         $splits = Transaction::where([
@@ -135,7 +133,7 @@ class Split extends Model
             (new self)->insert($split_data->toArray());   
             
             // sync to transactions
-            self::syncTransactions($symbol);
+            self::syncToTransactions($symbol);
         }
 
         return $split_data;

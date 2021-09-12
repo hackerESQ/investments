@@ -82,7 +82,7 @@ class PortfolioController extends Controller
         $portfolio->update($request->validated());
 
         // make sure we don't remove owner
-        $users = array_merge($request->input('users'), [$portfolio->owner_id]);
+        $users = array_merge($request->input('users', []), [$portfolio->owner_id]);
 
         $portfolio->users()->sync($users);
 

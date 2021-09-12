@@ -17,11 +17,11 @@ class CreateHoldingsTable extends Migration
             $table->id();
             $table->foreignId('portfolio_id')->constrained()->onDelete('cascade');
             $table->string('symbol');
-            $table->float('quantity', 10, 3);
-            $table->float('average_cost_basis', 10, 3);
-            $table->float('total_cost_basis', 10, 3)->nullable();
-            $table->float('realized_gain_loss_dollars', 10, 3)->nullable();
-            $table->float('dividends_earned', 10, 3)->nullable();
+            $table->float('quantity', 12, 4);
+            $table->float('average_cost_basis', 12, 4);
+            $table->float('total_cost_basis', 12, 4)->nullable();
+            $table->float('realized_gain_loss_dollars', 12, 4)->nullable();
+            $table->float('dividends_earned', 12, 4)->nullable();
             $table->timestamps();
         });
     }

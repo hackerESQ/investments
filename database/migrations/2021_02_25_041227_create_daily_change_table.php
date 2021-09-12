@@ -16,13 +16,12 @@ class CreateDailyChangeTable extends Migration
         Schema::create('daily_change', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->bigInteger('current_market_value');
-            $table->bigInteger('total_gain_loss');
-            $table->bigInteger('daily_gain_loss');
-            $table->bigInteger('total_cost_basis');
-            $table->bigInteger('daily_cost_basis_delta');
-            $table->bigInteger('total_dividends');
-            $table->bigInteger('realized_gains');
+            $table->foreign('user_id')->constrained()->onDelete('cascade');
+            $table->float('total_market_value', 12, 4);
+            $table->float('total_cost_basis', 12, 4);
+            $table->float('total_gain_loss', 12, 4);
+            $table->float('total_dividends', 12, 4);
+            $table->float('realized_gains', 12, 4);
             $table->timestamps();
         });
     }

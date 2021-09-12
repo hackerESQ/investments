@@ -24,7 +24,8 @@ class PortfolioIndexTable extends DataTableComponent
         return [
             Column::make('Title')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->excludeFromSelectable(),
             Column::make('Notes')
                     ->searchable()
                     ->sortable(),          

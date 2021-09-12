@@ -120,6 +120,16 @@ class Transaction extends Model
         return $this->hasOne(MarketData::class, 'symbol', 'symbol');
     }
 
+    /**
+     * get portfolio for transaction
+     *
+     * @return void
+     */
+    public function portfolio()
+    {
+        return $this->belongsTo(Portfolio::class);
+    }
+
     public function scopePortfolio($query, $portfolio)
     {
         return $query->where('portfolio_id', $portfolio);
