@@ -22,7 +22,9 @@ class PortfolioIndexTable extends DataTableComponent
             Column::make('Title')
                     ->searchable()
                     ->sortable()
-                    ->excludeFromSelectable(),
+                    ->format(function ($value, $column, $row) {
+                        return $value . ($row->wishlist ? ' (wishlist)' : '');
+                    })->excludeFromSelectable(),
             Column::make('Notes')
                     ->searchable()
                     ->sortable(),          
