@@ -14,15 +14,15 @@ class CreateDailyChangeTable extends Migration
     public function up()
     {
         Schema::create('daily_change', function (Blueprint $table) {
-            $table->id();
             $table->date('date');
-            $table->foreign('user_id')->constrained()->onDelete('cascade');
-            $table->float('total_market_value', 12, 4);
-            $table->float('total_cost_basis', 12, 4);
-            $table->float('total_gain_loss', 12, 4);
-            $table->float('total_dividends', 12, 4);
-            $table->float('realized_gains', 12, 4);
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->float('total_market_value', 12, 4)->nullable();
+            $table->float('total_cost_basis', 12, 4)->nullable();
+            $table->float('total_gain_loss', 12, 4)->nullable();
+            $table->float('total_dividends', 12, 4)->nullable();
+            $table->float('realized_gains', 12, 4)->nullable();
+
+            $table->primary(['date', 'user_id']);
         });
     }
 

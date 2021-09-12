@@ -9,6 +9,8 @@ class DailyChange extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     /**
      * Table name for the model
      *

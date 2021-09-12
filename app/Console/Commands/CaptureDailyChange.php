@@ -57,7 +57,9 @@ class CaptureDailyChange extends Command
             });
 
             $total_market_value = $portfolios->reduce(function ($carry, $portfolio) {
-                return $carry + $portfolio->holdings->sum('market_data.market_value');
+                return $carry + $portfolio->holdings->sum(function($holding) {
+                    return $holding->market_data->market_value * $holding->quantity;
+                }) ;
             });
 
             $user->daily_changes()->create([
