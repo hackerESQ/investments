@@ -4,9 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Models\Holding;
 use App\Models\Portfolio;
-use App\Models\MarketData;
 use App\Traits\FormatsMoney;
-use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
@@ -40,8 +38,7 @@ class PortfolioHoldingsTable extends DataTableComponent
                 ->sortable()
                 ->searchable(),
             Column::make('Quantity', 'quantity')
-                ->sortable()
-                ->searchable(),
+                ->sortable(),
             Column::make('Average Cost Basis', 'average_cost_basis')
                 ->sortable()
                 ->format(function ($value, $column, $row) {
@@ -116,9 +113,9 @@ class PortfolioHoldingsTable extends DataTableComponent
             ->withCount('transactions')
             ->selectRaw('((market_data.market_value - holdings.average_cost_basis) * holdings.quantity) AS market_gain_loss_dollars')
             ->selectRaw('(((market_data.market_value - holdings.average_cost_basis) / holdings.average_cost_basis) * 100) AS market_gain_loss_percent')
-            ->selectRaw('market_data.fifty_two_week_low')
             ->selectRaw('market_data.market_value AS market_value')
             ->selectRaw('(holdings.quantity * market_data.market_value) AS total_market_value')
+            ->selectRaw('market_data.fifty_two_week_low')
             ->selectRaw('market_data.fifty_two_week_high')
             ->selectRaw('market_data.updated_at AS market_data_age')
             ->selectRaw('market_data.name')

@@ -16,7 +16,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        return Transaction::myTransactions()->get();
+        return view('pages.transactions.index');
     }
 
     /**

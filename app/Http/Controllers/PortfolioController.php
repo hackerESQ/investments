@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Holding;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
 use App\Imports\PortfolioImport;
@@ -16,7 +17,18 @@ class PortfolioController extends Controller
      */
     public function index()
     {
-        return view('pages.portfolios.index');
+        // get stats
+        $metrics = Holding::query()
+            ->selectRaw('SUM(holdings.dividends_earned) AS total_dividends_earned')
+            ->selectRaw('SUM(holdings.realized_gain_loss_dollars) AS realized_gain_loss_dollars')
+            ->selectRaw('@total_market_value:=SUM(holdings.quantity * market_data.market_value) AS total_market_value')
+            ->selectRaw('@sum_total_cost_basis:=SUM(holdings.total_cost_basis) AS total_cost_basis')
+            ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
+            ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent')
+            ->join('market_data', 'market_data.symbol', 'holdings.symbol')
+            ->first();
+
+        return view('pages.portfolios.index', ['metrics' => $metrics]);
     }
 
     /**
@@ -52,7 +64,21 @@ class PortfolioController extends Controller
     {
         $this->authorize('view', $portfolio);
 
-        return view('pages.portfolios.show', ['portfolio' => $portfolio]);
+        // get stats
+        $metrics= Portfolio::where(['id' => $portfolio->id])
+            ->withSum('holdings as total_dividends_earned', 'dividends_earned')
+            ->withSum('holdings as total_gain_loss_dollars', 'realized_gain_loss_dollars')
+            ->selectRaw('@total_market_value:=(SELECT SUM(holdings.quantity * market_data.market_value) FROM holdings JOIN market_data ON market_data.symbol = holdings.symbol WHERE portfolios.id = holdings.portfolio_id) AS total_market_value')
+            ->selectRaw('@sum_total_cost_basis:=(SELECT SUM(holdings.total_cost_basis) FROM holdings WHERE portfolios.id = holdings.portfolio_id) AS total_cost_basis')
+            ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
+            ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent')
+            ->first();
+
+        // return view
+        return view('pages.portfolios.show', [
+            'portfolio' => $portfolio,
+            'metrics' => $metrics
+        ]);
     }
 
     /**

@@ -28,7 +28,7 @@ class PortfolioIndexTable extends DataTableComponent
             Column::make('Notes')
                     ->searchable()
                     ->sortable(),          
-            Column::make('Total Cost Basis', 'holdings_sum_total_cost_basis')
+            Column::make('Total Cost Basis', 'total_cost_basis')
                     ->format(function ($value, $column, $row) {
                         return $this->formatMoney($value);
                     })->sortable(),
@@ -62,13 +62,12 @@ class PortfolioIndexTable extends DataTableComponent
     public function query()
     {
             return Portfolio::query()->myPortfolios()
-                ->withSum('holdings', 'total_cost_basis')
                 ->withSum('holdings', 'dividends_earned')
                 ->withSum('holdings', 'realized_gain_loss_dollars')
                 ->selectRaw('@total_market_value:=(SELECT SUM(holdings.quantity * market_data.market_value) FROM holdings JOIN market_data ON market_data.symbol = holdings.symbol WHERE portfolios.id = holdings.portfolio_id) AS total_market_value')
-                ->selectRaw('@sum_total_cost_basis:=(SELECT SUM(holdings.total_cost_basis) FROM holdings WHERE portfolios.id = holdings.portfolio_id) AS sum_total_cost_basis')
-                ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
-                ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent');
+                ->selectRaw('@total_cost_basis:=(SELECT SUM(holdings.total_cost_basis) FROM holdings WHERE portfolios.id = holdings.portfolio_id) AS total_cost_basis')
+                ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @total_cost_basis) AS total_gain_loss_dollars')
+                ->selectRaw('(@total_gain_loss_dollars / @total_cost_basis) * 100 AS total_gain_loss_percent');
     }
 
     public function getTableRowUrl($row): string

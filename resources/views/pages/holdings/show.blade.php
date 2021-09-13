@@ -13,7 +13,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <div class="bg-white shadow-xl sm:rounded-lg p-6 border-gray-200">
@@ -23,14 +23,14 @@
                 @endforeach
             </div>
 
-            <div class="bg-white shadow-xl sm:rounded-lg p-6 border-gray-200">
+            <div class="bg-white shadow-xl sm:rounded-lg mt-6 p-6 border-gray-200">
                 @foreach ($holding->market_data->toArray() as $key => $value)
                     {{ $key . ' - ' . $value }}
                     <br>
                 @endforeach
             </div>
 
-            <div class="bg-white shadow-xl sm:rounded-lg p-6 border-gray-200">
+            <div class="bg-white shadow-xl sm:rounded-lg mt-6 p-6 border-gray-200">
                 @foreach ($holding->dividends as $dividend)
                     {{ $dividend->date .' - '. $dividend->total_received }}
                     <br>
