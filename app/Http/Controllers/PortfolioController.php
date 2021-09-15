@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Holding;
 use App\Models\Portfolio;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Imports\PortfolioImport;
 use App\Http\Requests\PortfolioRequest;
@@ -18,7 +19,9 @@ class PortfolioController extends Controller
     public function index()
     {
         // get stats
-        $metrics = Holding::getPortfolioMetrics()->first();
+        $metrics = cache()->remember('portfolio-metrics', 60, function () {
+            return Holding::getPortfolioMetrics()->first();
+        });
 
         return view('pages.portfolios.index', ['metrics' => $metrics]);
     }
@@ -57,9 +60,12 @@ class PortfolioController extends Controller
         $this->authorize('view', $portfolio);
 
         // get stats
-        $metrics= Holding::where(['portfolio_id' => $portfolio->id])
-                            ->getPortfolioMetrics()
-                            ->first();
+        $key = 'portfolio-metrics-' . Str::kebab($portfolio->title);
+        $metrics = cache()->remember($key, 60, function () use ($portfolio) {
+            return Holding::where(['portfolio_id' => $portfolio->id])
+                ->getPortfolioMetrics()
+                ->first();
+        });
 
         // return view
         return view('pages.portfolios.show', [
@@ -119,9 +125,9 @@ class PortfolioController extends Controller
     public function import(Request $request)
     {
         $file = $request->file('import')->store('/', 'local');
-        
+
         $import = (new PortfolioImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
 
-        return redirect(route('portfolio.index')); 
+        return redirect(route('portfolio.index'));
     }
 }

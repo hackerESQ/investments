@@ -16,35 +16,35 @@ class HoldingController extends Controller
      * @param  \App\Models\Holding  $holding
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Portfolio $portfolio, Holding $holding)
+    public function show(Request $request, Portfolio $portfolio)
     {
-        $holding = $holding->load([
-            'market_data',
-            'transactions' => function ($query) {
-                $query->orderBy('date');
-            }, 
-            'dividends' => function ($query) {
-                $query->select([
-                    'dividends.symbol',
-                    'dividends.date',
-                    'dividends.dividend_amount',
-                    ])->selectRaw('SUM(CASE WHEN transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS purchased')
-                    ->selectRaw('SUM(CASE WHEN transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS sold')
-                    ->join('transactions', 'transactions.symbol', 'dividends.symbol')
-                    ->groupBy([
-                        'dividends.symbol',
-                        'dividends.date',
-                        'dividends.dividend_amount',
-                    ])->orderBy('date');
-                // todo: only show relevant
-            },
-            'splits' => function ($query) {
-                $query->orderBy('date');
-            },
-            // todo: in other portfolios
-        ]);
-
-        // dd($holding->dividends);
+        $holding = $portfolio->holdings()
+                            ->where(['symbol' => $request->holding])
+                            ->with([
+                                'market_data',
+                                'transactions' => function ($query) {
+                                    $query->orderBy('date');
+                                }, 
+                                'dividends' => function ($query) {
+                                    $query->select([
+                                        'dividends.symbol',
+                                        'dividends.date',
+                                        'dividends.dividend_amount',
+                                        ])->selectRaw('SUM(CASE WHEN transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS purchased')
+                                        ->selectRaw('SUM(CASE WHEN transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS sold')
+                                        ->join('transactions', 'transactions.symbol', 'dividends.symbol')
+                                        ->groupBy([
+                                            'dividends.symbol',
+                                            'dividends.date',
+                                            'dividends.dividend_amount',
+                                        ])->orderBy('date')
+                                        ->where('dividends.date', '>=', DB::raw('transactions.date'));
+                                },
+                                'splits' => function ($query) {
+                                    $query->orderBy('date');
+                                },
+                                // todo: in other portfolios
+                            ])->firstOrFail();
 
         return view('pages.holdings.show', [
             'portfolio' => $portfolio,

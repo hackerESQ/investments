@@ -16,11 +16,16 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
-                @foreach ($holding->market_data->toArray() as $key => $value)
-                    {{ $key . ' - ' . $value }}
-                    <br>
-                @endforeach
-                Quantity - {{ $holding->quantity }}
+                <h1 class="text-2xl"> {{ $holding->symbol }} </h1>
+                <p>{{ $holding->market_data->name }} </p>
+                Quantity - {{ $holding->quantity }} <br/>
+                Average Cost Basis - ${{ number_format($holding->average_cost_basis, 2) }} <br/>
+                Total Cost Basis - ${{ number_format($holding->total_cost_basis, 2) }} <br/>
+                Realized Gain/Loss ($) - ${{ number_format($holding->realized_gain_loss_dollars, 2) }} <br/>
+                Dividends Earned - ${{ number_format($holding->dividends_earned, 2) }} <br/>
+                Current Market Value - ${{ number_format($holding->market_data->market_value, 2) }} <br/>
+                52 week low - ${{ number_format($holding->market_data->fifty_two_week_low, 2) }} <br/>
+                52 week high - ${{ number_format($holding->market_data->fifty_two_week_high, 2) }} <br/>
             </div>
         </div>
 

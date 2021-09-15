@@ -30,7 +30,6 @@ class AllTransactionsTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->excludeFromSelectable(),
-            
             Column::make('Symbol Name', 'name')
                 ->sortable()
                 ->searchable(),
@@ -93,6 +92,6 @@ class AllTransactionsTable extends DataTableComponent
 
     public function getTableRowUrl($row): string
     {
-        return route('portfolio.show', ['portfolio' => $row->portfolio_id]);
+        return route('holding.show', ['holding' => $row->symbol, 'portfolio' => $row->portfolio_id]);
     }
 }

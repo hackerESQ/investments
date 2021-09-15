@@ -12,7 +12,7 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-jet-nav-link href="{{ route('portfolio.index') }}" :active="request()->routeIs('portfolio.*')">
+                    <x-jet-nav-link href="{{ route('portfolio.index') }}" :active="request()->routeIs('holding.show') || request()->routeIs('portfolio.*')">
                         {{ __('Portfolios') }}
                     </x-jet-nav-link>
 
@@ -104,6 +104,10 @@
                                 {{ __('Profile') }}
                             </x-jet-dropdown-link>
 
+                            <x-jet-dropdown-link href="{{ route('portfolio.import') }}">
+                                {{ __('Import / Export') }}
+                            </x-jet-dropdown-link>
+
                             @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                                 <x-jet-dropdown-link href="{{ route('api-tokens.index') }}">
                                     {{ __('API Tokens') }}
@@ -145,6 +149,11 @@
             <x-jet-responsive-nav-link href="{{ route('portfolio.index') }}" :active="request()->routeIs('portfolio.*')">
                 {{ __('Portfolios') }}
             </x-jet-responsive-nav-link>
+
+            <x-jet-responsive-nav-link href="{{ route('transaction.index') }}" :active="request()->routeIs('transaction.*')">
+                {{ __('Transactions') }}
+            </x-jet-responsive-nav-link>
+
         </div>
 
         <!-- Responsive Settings Options -->

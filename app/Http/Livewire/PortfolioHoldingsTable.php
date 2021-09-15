@@ -124,6 +124,6 @@ class PortfolioHoldingsTable extends DataTableComponent
 
     public function getTableRowUrl($row): string
     {
-        return route('holding.show', ['holding' => $row->id, 'portfolio' => $row->portfolio_id]);
+        return route('holding.show', ['holding' => $row->symbol, 'portfolio' => $row->portfolio_id]);
     }
 }
