@@ -30,6 +30,8 @@ class SymbolValidationRule implements Rule
     {
         $this->symbol = $symbol;
 
+        // todo: check if in Market Data table first (avoid API call)
+
         return app(MarketDataInterface::class)->exists($symbol);
     }
 

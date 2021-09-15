@@ -15,26 +15,47 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            <div class="bg-white shadow-xl sm:rounded-lg p-6 border-gray-200">
-                @foreach ($holding->transactions as $transaction)
-                    {{ $transaction->date  }}
-                    <br>
-                @endforeach
-            </div>
-
-            <div class="bg-white shadow-xl sm:rounded-lg mt-6 p-6 border-gray-200">
+            <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                 @foreach ($holding->market_data->toArray() as $key => $value)
                     {{ $key . ' - ' . $value }}
                     <br>
                 @endforeach
+                Quantity - {{ $holding->quantity }}
             </div>
+        </div>
 
-            <div class="bg-white shadow-xl sm:rounded-lg mt-6 p-6 border-gray-200">
-                @foreach ($holding->dividends as $dividend)
-                    {{ $dividend->date .' - '. $dividend->total_received }}
-                    <br>
-                @endforeach
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="md:grid md:grid-cols-3 md:gap-6">
+                <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
+                    <h2>Transactions</h2>
+                    @foreach ($holding->transactions as $transaction)
+                        {{ $transaction->date  }}
+                        <br>
+                    @endforeach
+                </div>
+
+                <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
+                    <h2>Dividends</h2>
+                    @foreach ($holding->dividends as $dividend)
+                        @php
+                            $owned = ($dividend->purchased - $dividend->sold);
+                        @endphp 
+                        {{  $dividend->date .' - $'. 
+                            $dividend->dividend_amount . ' x '. 
+                            $owned . ' = $'. 
+                            number_format($owned * $dividend->dividend_amount, 2) }}
+                        <br>
+                    @endforeach
+                </div>
+
+                <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
+                    <h2>Splits</h2>
+                    @foreach ($holding->splits as $split)
+                        {{ $split->date .' - '. $split->split_amount }}
+                        <br>
+                    @endforeach
+                </div>
+
             </div>
         </div>
     </div>

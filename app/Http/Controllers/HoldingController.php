@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Holding;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HoldingController extends Controller
 {
@@ -19,13 +20,31 @@ class HoldingController extends Controller
     {
         $holding = $holding->load([
             'market_data',
-            'transactions', 
-            'dividends' => function ($q) use ($portfolio) {
-                // todo: use some kind of date filter based on transactions
-                // $q->where('dividends.portfolio_id', $portfolio->id);
-            }
+            'transactions' => function ($query) {
+                $query->orderBy('date');
+            }, 
+            'dividends' => function ($query) {
+                $query->select([
+                    'dividends.symbol',
+                    'dividends.date',
+                    'dividends.dividend_amount',
+                    ])->selectRaw('SUM(CASE WHEN transaction_type = "BUY" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS purchased')
+                    ->selectRaw('SUM(CASE WHEN transaction_type = "SELL" AND transactions.symbol = dividends.symbol AND dividends.date >= transactions.date THEN quantity ELSE 0 END) AS sold')
+                    ->join('transactions', 'transactions.symbol', 'dividends.symbol')
+                    ->groupBy([
+                        'dividends.symbol',
+                        'dividends.date',
+                        'dividends.dividend_amount',
+                    ])->orderBy('date');
+                // todo: only show relevant
+            },
+            'splits' => function ($query) {
+                $query->orderBy('date');
+            },
             // todo: in other portfolios
         ]);
+
+        // dd($holding->dividends);
 
         return view('pages.holdings.show', [
             'portfolio' => $portfolio,

@@ -21,13 +21,18 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="bg-white shadow-xl sm:rounded-lg p-6 border-gray-200">
-                total_dividends_earned {{ $metrics->total_dividends_earned }} <br/>
-                total_gain_loss_dollars {{ $metrics->total_gain_loss_dollars }}  <br/>
-                total_market_value {{ $metrics->total_market_value }}  <br/>
-                total_cost_basis {{ $metrics->total_cost_basis }}  <br/>
-                total_gain_loss_dollars {{ $metrics->total_gain_loss_dollars }}  <br/>
-                total_gain_loss_percent  {{ $metrics->total_gain_loss_percent }}  <br/>
+            <div class="md:grid md:grid-cols-3 md:gap-6">
+                <x-widget title="Realized Gain/Loss ($)" metric="${{ number_format($metrics->realized_gain_loss_dollars, 2) }}" />
+
+                <x-widget title="Total Gain/Loss ($)" metric="${{ number_format($metrics->total_gain_loss_dollars, 2) }}" />
+                
+                <x-widget title="Total Gain/Loss (%)" metric="{{ number_format($metrics->total_gain_loss_percent, 2) }}%" />
+
+                <x-widget title="Total Cost Basis" metric="${{ number_format($metrics->total_cost_basis, 2) }}" />
+
+                <x-widget title="Total Market Value" metric="${{ number_format($metrics->total_market_value, 2) }}" />
+                                 
+                <x-widget title="Total Dividends Earned" metric="${{ number_format($metrics->total_dividends_earned, 2) }}" />
             </div>
 
             <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
