@@ -82,6 +82,11 @@ class Holding extends Model
         return $query->where('portfolio_id', $portfolio);
     }
 
+    public function scopeWithoutWishlists($query) {
+        return $query->join('portfolios', 'portfolios.id', 'holdings.portfolio_id')
+            ->where('portfolios.wishlist', 0);
+    }
+
     public function scopeGetPortfolioMetrics($query) 
     {
         $query->selectRaw('SUM(holdings.dividends_earned) AS total_dividends_earned')

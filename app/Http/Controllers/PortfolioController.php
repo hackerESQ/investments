@@ -6,7 +6,6 @@ use App\Models\Holding;
 use App\Models\Portfolio;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Imports\PortfolioImport;
 use App\Http\Requests\PortfolioRequest;
 
 class PortfolioController extends Controller
@@ -20,7 +19,7 @@ class PortfolioController extends Controller
     {
         // get stats
         $metrics = cache()->remember('portfolio-metrics', 60, function () {
-            return Holding::getPortfolioMetrics()->first();
+            return Holding::getPortfolioMetrics()->withoutWishlists()->first();
         });
 
         return view('pages.portfolios.index', ['metrics' => $metrics]);
@@ -114,19 +113,6 @@ class PortfolioController extends Controller
         $this->authorize('delete', $portfolio);
 
         $portfolio->delete();
-
-        return redirect(route('portfolio.index'));
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function import(Request $request)
-    {
-        $file = $request->file('import')->store('/', 'local');
-
-        $import = (new PortfolioImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
 
         return redirect(route('portfolio.index'));
     }

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Import Portfolio') }}
+            {{ __('Import / Export Transactions') }}
 
             <x-link-button class="ml-4" href="{{ route('portfolio.index') }}">
                 {{ __('Back to home') }}
@@ -13,6 +13,8 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-gray-200">
+                <h1 class="title">Import</h1>
+
                 <x-jet-validation-errors class="mb-4" />
 
                 @if (session('status'))
@@ -21,7 +23,7 @@
                     </div>
                 @endif
 
-                <form method="POST" enctype="multipart/form-data" action="{{ route('portfolio.import') }}">
+                <form method="POST" enctype="multipart/form-data" action="{{ route('transaction.import') }}">
                     @csrf
 
                     <div class="mt-4">
@@ -35,6 +37,14 @@
                         </x-jet-button>
                     </div>
                 </form>
+            </div>
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
+
+                <h1 class="title">Export</h1>
+
+                <a class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition" href="{{ route('transaction.export') }}">
+                    {{ __('Export') }}
+                </a>
 
             </div>
         </div>

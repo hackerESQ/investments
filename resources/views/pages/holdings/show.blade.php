@@ -34,7 +34,8 @@
                 <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                     <h2>Transactions</h2>
                     @foreach ($holding->transactions as $transaction)
-                        {{ $transaction->date  }}
+                        <span style="float:left">{{ $transaction->date  }}</span>
+                        <span>@livewire('delete-transaction', ['transaction' => $transaction])</span>
                         <br>
                     @endforeach
                 </div>

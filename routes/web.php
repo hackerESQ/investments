@@ -25,11 +25,12 @@ Route::redirect('/', '/portfolio', 301);
 Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     // portfolios resource
-    Route::view('portfolio/import', 'pages.portfolios.import')->name('portfolio.importForm');
-    Route::post('portfolio/import', [PortfolioController::class, 'import'])->name('portfolio.import');
     Route::resource('portfolio', PortfolioController::class);
 
     // transactions resource
+    Route::view('transaction/import', 'pages.transactions.import')->name('transaction.importForm');
+    Route::post('transaction/import', [TransactionController::class, 'import'])->name('transaction.import');
+    Route::get('transaction/export', [TransactionController::class, 'export'])->name('transaction.export');
     Route::get('transaction', [TransactionController::class, 'index'])->name('transaction.index');
     Route::get('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'create'])->name('portfolio.transaction.create');
     Route::post('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'store'])->name('portfolio.transaction.store');

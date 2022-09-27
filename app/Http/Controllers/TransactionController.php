@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Portfolio;
 use App\Models\Transaction;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Exports\TransactionExport;
+use App\Imports\TransactionImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\TransactionRequest;
 
 class TransactionController extends Controller
@@ -81,5 +85,27 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         //
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function import(Request $request)
+    {
+        $file = $request->file('import')->store('/', 'local');
+
+        $import = (new TransactionImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
+
+        return redirect(route('portfolio.index'));
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function export()
+    {
+        return Excel::download(new TransactionExport, now()->format('Y_m_d') . '_transactions.xlsx');
     }
 }

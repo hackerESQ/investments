@@ -21,6 +21,8 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
+            
+
             <div class="md:grid md:grid-cols-3 md:gap-6">
                 <x-widget title="Realized Gain/Loss ($)" metric="${{ number_format($metrics->realized_gain_loss_dollars, 2) }}" />
 
@@ -38,6 +40,8 @@
             <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                 @livewire('portfolio-holdings-table', ['portfolio' => $portfolio])
             </div>
+
+            
         </div>
     </div>
 </x-app-layout>

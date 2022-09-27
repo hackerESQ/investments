@@ -41,7 +41,7 @@
                                 <x-jet-checkbox name="wishlist" id="wishlist" value="1" />
     
                                 <div class="ml-2">
-                                    {!! __('Treat this portfolio as a "wishlist" (holdings will be excluded from realized gains, unrealized gains, or dividends)') !!}
+                                    {!! __('Treat this portfolio as a "wishlist" (holdings will be excluded from realized gains, unrealized gains, and dividends)') !!}
                                 </div>
                             </div>
                         </x-jet-label>
