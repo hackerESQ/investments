@@ -13,7 +13,8 @@ class RefreshSplitData extends Command
      *
      * @var string
      */
-    protected $signature = 'split-data:refresh';
+    protected $signature = 'split-data:refresh
+                            {--force= : Don\'t ask to confirm.}';
 
     /**
      * The console command description.
@@ -41,9 +42,12 @@ class RefreshSplitData extends Command
     {
         $holdings = Holding::distinct()->get(['symbol']);
 
-        foreach ($holdings as $holding) {
-            $this->line('Refreshing ' . $holding->symbol);
-            Split::getSplitData($holding->symbol);
+        if ($this->confirm('This can be destructive to existing transactions. Do you wish to continue?') || $this->option('force')) {
+            foreach ($holdings as $holding) {
+                $this->line('Refreshing ' . $holding->symbol);
+                Split::getSplitData($holding->symbol);
+            }
         }
+        
     }
 }

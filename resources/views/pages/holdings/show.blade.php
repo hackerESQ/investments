@@ -21,7 +21,15 @@
                     <span style="font-size:.65em">{{ $holding->market_data->name }}</span>
                 </h1>
                 <h2 style="font-weight: bold; font-size: 1.5em"> 
-                    ${{ number_format($holding->market_data->market_value, 2) }} 
+                    ${{ number_format($holding->market_data->market_value, 2) }}  
+                    @php
+                        $isUp = $holding->average_cost_basis <= $holding->market_data->market_value;
+                        $formatter = new NumberFormatter('en_US', NumberFormatter::PERCENT);
+                    @endphp
+                    <span style="font-weight: 100; color: {{ $isUp ? 'rgb(0, 200, 0)' : 'rgb(255, 20, 0)' }}; font-size: .75em;">
+                        {!! $isUp ?  '&#9650;' :'&#9660;' !!}
+                        {{ $formatter->format(($holding->market_data->market_value - $holding->average_cost_basis) / $holding->average_cost_basis) }}
+                    </span>
                 </h2>
                 <p> <b>Quantity Owned:</b>  {{ $holding->quantity }} </p>
                 <p> <b>Average Cost Basis:</b>  ${{ number_format($holding->average_cost_basis, 2) }} </p>
