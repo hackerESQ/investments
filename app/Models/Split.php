@@ -54,7 +54,7 @@ class Split extends Model
             'splits.symbol' => $symbol,
         ])
         ->whereDate('transactions.date', '<=', DB::raw('splits.date'))
-        ->whereDate('transactions.date', '>', DB::raw('market_data.splits_synced_to_holdings_at'))
+        ->whereDate('transactions.date', '>', DB::raw('IFNULL(market_data.splits_synced_to_holdings_at, "0000-00-00")'))
         ->select(['transactions.id as transaction_id', 'splits.date as split_date', 'splits.symbol', 'transactions.cost_basis', 'transactions.quantity', 'splits.split_amount', 'transactions.date as transaction_date'])
         ->join('splits', 'transactions.symbol', 'splits.symbol')
         ->join('market_data', 'transactions.symbol', 'market_data.symbol')
@@ -66,9 +66,10 @@ class Split extends Model
             ->get()
             ->each(function ($transaction) use ($splits) {
                 $splits->where('transaction_id', $transaction->id)->sortBy('split_date')->each(function($split) use ($transaction) {
+                    dump($split->split_amount);
                     $transaction->update([    
-                        'quantity' => $split->quantity * $split->split_amount,
-                        'cost_basis' => $split->cost_basis / $split->split_amount
+                        'quantity' => $transaction->quantity * $split->split_amount,
+                        'cost_basis' => $transaction->cost_basis / $split->split_amount
                     ]);
                 });
             });
@@ -87,14 +88,14 @@ class Split extends Model
     public static function getSplitData(string $symbol) 
     {
         // dates for split data
-        $splits = self::where(['symbol' => $symbol])
+        $splits_meta = self::where(['symbol' => $symbol])
             ->selectRaw('COUNT(symbol) as total_splits')
             ->selectRaw('MIN(date) as first_date')
             ->selectRaw('MAX(date) as last_date')
             ->get()
             ->first();
      
-        $transactions = Transaction::where(['symbol' => $symbol])
+        $transactions_meta = Transaction::where(['symbol' => $symbol])
             ->selectRaw('MIN(date) as first_date')
             ->selectRaw('MAX(date) as last_date')
             ->get()
@@ -102,24 +103,25 @@ class Split extends Model
 
         $split_data = collect();
 
-        // need to fill in earlier splits 
-        if ($transactions->first_date->lessThan($splits->first_date)) {
+        if ($splits_meta->total_splits != 0) {
+            // need to fill in earlier splits 
+            if ($transactions_meta->first_date->lessThan($splits_meta->first_date)) {
 
-            $start_date = $transactions->first_date;
-            $end_date = $splits->first_date->subHours(48);
-        } 
+                $start_date = $transactions_meta->first_date;
+                $end_date = $splits_meta->first_date->subHours(48);
+            } 
 
-        // need to populate newer split data
-        if ($splits->last_date?->lessThan($transactions->last_date)) {
+            // need to populate newer split data
+            if ($splits_meta->last_date?->lessThan($transactions_meta->last_date)) {
 
-            $start_date = $splits->last_date->addHours(48);
-            $end_date =  now();
-        }
+                $start_date = $splits_meta->last_date->addHours(48);
+                $end_date =  now();
+            }
 
         // need to populate all split data because it didnt exist before
-        if ($splits->total_splits == 0) {
+        } else {
 
-            $start_date = $transactions->first_date;
+            $start_date = $transactions_meta->first_date;
             $end_date = now();
         }
 
@@ -132,9 +134,10 @@ class Split extends Model
             // insert records
             (new self)->insert($split_data->toArray());   
             
-            // sync to transactions
-            self::syncToTransactions($symbol);
         }
+
+        // sync to transactions
+        self::syncToTransactions($symbol);
 
         return $split_data;
     }

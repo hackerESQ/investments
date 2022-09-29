@@ -16,16 +16,20 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
-                <h1 class="text-2xl"> {{ $holding->symbol }} </h1>
-                <p>{{ $holding->market_data->name }} </p>
-                Quantity - {{ $holding->quantity }} <br/>
-                Average Cost Basis - ${{ number_format($holding->average_cost_basis, 2) }} <br/>
-                Total Cost Basis - ${{ number_format($holding->total_cost_basis, 2) }} <br/>
-                Realized Gain/Loss ($) - ${{ number_format($holding->realized_gain_loss_dollars, 2) }} <br/>
-                Dividends Earned - ${{ number_format($holding->dividends_earned, 2) }} <br/>
-                Current Market Value - ${{ number_format($holding->market_data->market_value, 2) }} <br/>
-                52 week low - ${{ number_format($holding->market_data->fifty_two_week_low, 2) }} <br/>
-                52 week high - ${{ number_format($holding->market_data->fifty_two_week_high, 2) }} <br/>
+                <h1 class="text-2xl"> 
+                    {{ $holding->symbol }} 
+                    <span style="font-size:.65em">{{ $holding->market_data->name }}</span>
+                </h1>
+                <h2 style="font-weight: bold; font-size: 1.5em"> 
+                    ${{ number_format($holding->market_data->market_value, 2) }} 
+                </h2>
+                <p> <b>Quantity Owned:</b>  {{ $holding->quantity }} </p>
+                <p> <b>Average Cost Basis:</b>  ${{ number_format($holding->average_cost_basis, 2) }} </p>
+                <p> <b>Total Cost Basis:</b>   ${{ number_format($holding->total_cost_basis, 2) }} </p>
+                <p> <b>Realized Gain/Loss ($):</b>  ${{ number_format($holding->realized_gain_loss_dollars, 2) }} </p>
+                <p> <b>Dividends Earned:</b>   ${{ number_format($holding->dividends_earned, 2) }} </p>
+                <p> <b>52 week:</b>   ${{ number_format($holding->market_data->fifty_two_week_low, 2) }} - ${{ number_format($holding->market_data->fifty_two_week_high, 2) }}</p>
+                <p class=" py-4" style="font-size:.75em"> Last Update: {{ $holding->market_data->updated_at }}</p>
             </div>
         </div>
 
@@ -34,8 +38,14 @@
                 <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                     <h2>Transactions</h2>
                     @foreach ($holding->transactions as $transaction)
-                        <span style="float:left">{{ $transaction->date  }}</span>
-                        <span>@livewire('delete-transaction', ['transaction' => $transaction])</span>
+                        <span style="float:left">
+                            <b>{{ $transaction->date->format('Y-m-d') }}</b>
+                            {{ $transaction->transaction_type }} 
+                            {{ $transaction->quantity }} 
+                            for 
+                            ${{ number_format($transaction->sale_price ?? $transaction->cost_basis, 2) }}
+                        </span>
+                        <span title="delete transaction">@livewire('delete-transaction', ['transaction' => $transaction])</span>
                         <br>
                     @endforeach
                 </div>
@@ -46,10 +56,10 @@
                         @php
                             $owned = ($dividend->purchased - $dividend->sold);
                         @endphp 
-                        {{  $dividend->date .' - $'. 
-                            $dividend->dividend_amount . ' x '. 
-                            $owned . ' = $'. 
-                            number_format($owned * $dividend->dividend_amount, 2) }}
+                        <b>{{ $dividend->date->format('Y-m-d') }}</b>
+                        ${{ $dividend->dividend_amount . ' x ' }}
+                        {{ $owned . ' = $' }}
+                        {{ number_format($owned * $dividend->dividend_amount, 2) }}
                         <br>
                     @endforeach
                 </div>
@@ -57,7 +67,8 @@
                 <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                     <h2>Splits</h2>
                     @foreach ($holding->splits as $split)
-                        {{ $split->date .' - '. $split->split_amount }}
+                        <b>{{ $split->date->format('Y-m-d') }} </b>
+                        {{ $split->split_amount }}:1
                         <br>
                     @endforeach
                 </div>

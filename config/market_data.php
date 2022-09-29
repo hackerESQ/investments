@@ -5,7 +5,6 @@ return [
 
     'default' => env('MARKET_DATA', 'yahoo'),
 
-    'yahoo' => [
-        'class' => App\Interfaces\MarketData\YahooMarketData::class,
-    ],
+    'yahoo' => App\Interfaces\MarketData\YahooMarketData::class,
+    'fake' => App\Interfaces\MarketData\FakeMarketData::class,
 ];

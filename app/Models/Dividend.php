@@ -85,14 +85,14 @@ class Dividend extends Model
     public static function getDividendData(string $symbol) 
     {
         // some dividend meta data
-        $dividends = self::where(['symbol' => $symbol])
+        $dividends_meta = self::where(['symbol' => $symbol])
             ->selectRaw('COUNT(symbol) as total_dividends')
             ->selectRaw('MIN(date) as first_date')
             ->selectRaw('MAX(date) as last_date')
             ->get()
             ->first();
 
-        $transactions = Transaction::where(['symbol' => $symbol])
+        $transactions_meta = Transaction::where(['symbol' => $symbol])
                 ->selectRaw('MIN(date) as first_date')
                 ->selectRaw('MAX(date) as last_date')
                 ->get()
@@ -100,24 +100,27 @@ class Dividend extends Model
 
         $dividend_data = collect();
 
-        // need to fill in earlier dividends because of a new transaction
-        if ($transactions->first_date->lessThan($dividends->first_date)) {
+        // have some dividends, let's do something with them
+        if ($dividends_meta->total_dividends != 0) {
 
-            $start_date = $transactions->first_date;
-            $end_date = $dividends->first_date->subHours(48);
-        } 
+            // need to fill in earlier dividends because of a new transaction
+            if ($transactions_meta->first_date->lessThan($dividends_meta->first_date)) {
 
-        // need to populate newer dividend data because of a new dividend
-        if ($dividends->last_date?->lessThan($transactions->last_date)) {
+                $start_date = $transactions_meta->first_date;
+                $end_date = $dividends_meta->first_date->subHours(48);
+            } 
 
-            $start_date = $dividends->last_date->addHours(48);
-            $end_date =  now();
-        }
+            // need to populate newer dividend data because of a new transaction
+            if ($dividends_meta->last_date?->lessThan($transactions_meta->last_date)) {
+
+                $start_date = $dividends_meta->last_date->addHours(48);
+                $end_date =  now();
+            }
 
         // need to populate all dividend data because it didnt exist before
-        if ($dividends->total_dividends == 0) {
+        } else {
 
-            $start_date = $transactions->first_date;
+            $start_date = $transactions_meta->first_date;
             $end_date = now();
         }
 
