@@ -40,6 +40,11 @@ class AllTransactionsTable extends DataTableComponent
                 ->sortable(),
             Column::make('Quantity', 'quantity')
                 ->sortable(),
+            Column::make('Split', 'split')
+                ->sortable()
+                ->format(function ($value, $column, $row) {
+                    return $value ? 'true' : '';
+                }),
             Column::make('Cost Basis', 'cost_basis')
                 ->sortable()
                 ->format(function ($value, $column, $row) {
@@ -72,6 +77,7 @@ class AllTransactionsTable extends DataTableComponent
                 'transactions.cost_basis',
                 'transactions.sale_price',
                 'transactions.transaction_type',
+                'transactions.split',
                 'transactions.updated_at',
                 'transactions.created_at',
             ])->selectRaw('market_data.market_value AS market_value')

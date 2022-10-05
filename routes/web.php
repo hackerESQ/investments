@@ -26,6 +26,7 @@ Route::redirect('/', '/portfolio', 301);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
+    // backup
     Route::post('import', [ImportExportController::class, 'import'])->name('backup.import');
     Route::view('import', 'pages.backup')->name('backup.importForm');
     Route::get('export', [ImportExportController::class, 'export'])->name('backup.export');
@@ -41,7 +42,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     // Route::put('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
 
     // holdings view
-    Route::get('portfolio/{portfolio}/holding/{holding:symbol}', [HoldingController::class, 'show'])->name('holding.show');
+    Route::get('portfolio/{portfolio}/symbol/{holding:symbol}', [HoldingController::class, 'show'])->name('holding.show');
 
     Route::get('test', function(){
 

@@ -65,25 +65,34 @@
 
                 <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                     <h2>Dividends</h2>
-                    @foreach ($holding->dividends as $dividend)
-                        @php
-                            $owned = ($dividend->purchased - $dividend->sold);
-                        @endphp 
-                        <b>{{ $dividend->date->format('Y-m-d') }}</b>
-                        ${{ $dividend->dividend_amount . ' x ' }}
-                        {{ $owned . ' = $' }}
-                        {{ number_format($owned * $dividend->dividend_amount, 2) }}
-                        <br>
-                    @endforeach
+                    @if ($holding->dividends->count() > 0)
+                        @foreach ($holding->dividends as $dividend)
+                            @php
+                                $owned = ($dividend->purchased - $dividend->sold);
+                            @endphp 
+                            <b>{{ $dividend->date->format('Y-m-d') }}</b>
+                            ${{ $dividend->dividend_amount . ' x ' }}
+                            {{ $owned . ' = $' }}
+                            {{ number_format($owned * $dividend->dividend_amount, 2) }}
+                            <br>
+                        @endforeach
+                    @else
+                        <small>No dividends reported</small>
+                    @endif
+                    
                 </div>
 
                 <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                     <h2>Splits</h2>
-                    @foreach ($holding->splits as $split)
-                        <b>{{ $split->date->format('Y-m-d') }} </b>
-                        {{ $split->split_amount }}:1
-                        <br>
-                    @endforeach
+                    @if ($holding->splits->count() > 0)
+                        @foreach ($holding->splits as $split)
+                            <b>{{ $split->date->format('Y-m-d') }} </b>
+                            {{ $split->split_amount }}:1
+                            <br>
+                        @endforeach
+                    @else
+                        <small>No splits reported</small>
+                    @endif
                 </div>
 
             </div>
