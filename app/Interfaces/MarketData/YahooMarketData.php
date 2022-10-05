@@ -52,10 +52,12 @@ class YahooMarketData implements MarketDataInterface
     {   
         return collect($this->client->getHistoricalSplitData($symbol, $startDate, $endDate))
                         ->map(function($split) use ($symbol) {
+                            $split_amount = explode(':', $split->getStockSplits());
+
                             return [
                                 'symbol' => $symbol,
                                 'date' => $split->getDate()->format('Y-m-d H:i:s'),
-                                'split_amount' => explode(':', $split->getStockSplits())[0],
+                                'split_amount' => $split_amount[0] / $split_amount[1],
                             ];
                         });
     }
