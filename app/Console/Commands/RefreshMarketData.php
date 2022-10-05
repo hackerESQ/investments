@@ -43,13 +43,6 @@ class RefreshMarketData extends Command
         // get all symbols from market data
         $symbols = MarketData::get(['symbol']);
 
-        // // get all symbols in market data where holding qty > 1
-        // $symbols = MarketData::with(['holdings'])->whereHas('holdings', function($query) {
-        //     $query->where('quantity', '>', 0);
-        // })->get(['symbol']);
-
-        // $this->option('force')
-
         foreach ($symbols as $symbol) {
             $this->line('Refreshing ' . $symbol->symbol);
             $symbol->refreshMarketData();

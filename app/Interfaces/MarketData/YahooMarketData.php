@@ -11,18 +11,12 @@ class YahooMarketData implements MarketDataInterface
     // api client
     public $client;
 
-    // scratch pad for dividends
-    public $dividends = [];
-
-    // scratch pad for splits
-    public $splits = [];
-
     public function __construct() {
         // create yahoo finance client factory
         $this->client = ApiClientFactory::createApiClient();
     }
 
-    public function exists(String $symbol): bool
+    public function exists(String $symbol): Bool
     {
         return $this->quote($symbol)->isNotEmpty();
     }

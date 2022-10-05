@@ -24,7 +24,7 @@ class DividendsSheet implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 'date' => $row['date'],
             ],[
                 'symbol' => $row['symbol'],
-                'dividend_amount' => $row['amount'],
+                'dividend_amount' => $row['amount'] ?? 0,
                 'date' => $row['date'],
             ]);
         }
