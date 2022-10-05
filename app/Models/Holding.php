@@ -33,9 +33,7 @@ class Holding extends Model
      *
      * @var array
      */
-    protected $casts = [
-        'market_data_age' => 'datetime',
-    ];
+    protected $casts = [];
 
     /**
      * get market data for holding

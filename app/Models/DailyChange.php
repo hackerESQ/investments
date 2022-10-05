@@ -24,6 +24,7 @@ class DailyChange extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
         'date',
         'total_market_value',
         'total_cost_basis',
@@ -47,5 +48,10 @@ class DailyChange extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
+
+    public function scopeMyDailyChanges($query)
+    {
+        return $query->where('user_id', auth()->user()->id);
+    }
 
 }

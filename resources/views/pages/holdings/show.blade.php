@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Viewing Holding') . ': ' . $holding->symbol . ' in ' . $portfolio->title }}
+            {{ $portfolio->title . ' > ' . $holding->symbol   }}
 
             <x-link-button class="ml-4" href="{{ route('portfolio.show', $portfolio->id) }}">
                 {{ __('Back to Portfolio') }}
@@ -22,14 +22,18 @@
                 </h1>
                 <h2 style="font-weight: bold; font-size: 1.5em"> 
                     ${{ number_format($holding->market_data->market_value, 2) }}  
+                    @if ($holding->average_cost_basis)
+                        
+                    
                     @php
                         $isUp = $holding->average_cost_basis <= $holding->market_data->market_value;
                         $formatter = new NumberFormatter('en_US', NumberFormatter::PERCENT);
                     @endphp
                     <span style="font-weight: 100; color: {{ $isUp ? 'rgb(0, 200, 0)' : 'rgb(255, 20, 0)' }}; font-size: .75em;">
                         {!! $isUp ?  '&#9650;' :'&#9660;' !!}
-                        {{ $formatter->format(($holding->market_data->market_value - $holding->average_cost_basis) / $holding->average_cost_basis) }}
+                        {{ $formatter->format(  (($holding->market_data->market_value - $holding->average_cost_basis) / $holding->average_cost_basis) ) }}
                     </span>
+                    @endif
                 </h2>
                 <p> <b>Quantity Owned:</b>  {{ $holding->quantity }} </p>
                 <p> <b>Average Cost Basis:</b>  ${{ number_format($holding->average_cost_basis, 2) }} </p>
@@ -52,6 +56,7 @@
                             {{ $transaction->quantity }} 
                             for 
                             ${{ number_format($transaction->sale_price ?? $transaction->cost_basis, 2) }}
+                            {{ $transaction->split ? '(split)' : '' }}
                         </span>
                         <span title="delete transaction">@livewire('delete-transaction', ['transaction' => $transaction])</span>
                         <br>

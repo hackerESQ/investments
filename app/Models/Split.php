@@ -49,30 +49,46 @@ class Split extends Model
      */
     public static function syncToTransactions($symbol) 
     {
-        // pull split data joined 
-        $splits = Transaction::where([
-            'splits.symbol' => $symbol,
-        ])
-        ->whereDate('transactions.date', '<=', DB::raw('splits.date'))
-        ->whereDate('transactions.date', '>', DB::raw('IFNULL(market_data.splits_synced_to_holdings_at, "0000-00-00")'))
-        ->select(['transactions.id as transaction_id', 'splits.date as split_date', 'splits.symbol', 'transactions.cost_basis', 'transactions.quantity', 'splits.split_amount', 'transactions.date as transaction_date'])
-        ->join('splits', 'transactions.symbol', 'splits.symbol')
-        ->join('market_data', 'transactions.symbol', 'market_data.symbol')
-        ->groupBy(['transactions.id', 'splits.date', 'splits.symbol', 'transactions.cost_basis', 'transactions.quantity', 'splits.split_amount', 'transactions.date'])
-        ->get();
+        // get relevant split data
+        $splits = self::where([
+                'splits.symbol' => $symbol,
+            ])
+            ->whereDate('transactions.date', '>', DB::raw('IFNULL(market_data.splits_synced_to_holdings_at, "0000-00-00")'))
+            ->select([
+                'splits.date', 
+                'splits.symbol', 
+                'splits.split_amount', 
+                'transactions.portfolio_id'
+            ])
+            ->join('transactions', 'transactions.symbol', 'splits.symbol')
+            ->join('market_data', 'transactions.symbol', 'market_data.symbol')
+            ->orderBy('splits.date', 'ASC')
+            ->get();
 
-        // iterate through transactions and update each with splits
-        Transaction::where(['symbol' => $symbol])
-            ->get()
-            ->each(function ($transaction) use ($splits) {
-                $splits->where('transaction_id', $transaction->id)->sortBy('split_date')->each(function($split) use ($transaction) {
-                    dump($split->split_amount);
-                    $transaction->update([    
-                        'quantity' => $transaction->quantity * $split->split_amount,
-                        'cost_basis' => $transaction->cost_basis / $split->split_amount
-                    ]);
-                });
-            });
+        foreach($splits as $split) {
+
+            $qty_owned = Transaction::where([
+                    'symbol' => $split->symbol, 
+                    'portfolio_id' => $split->portfolio_id
+                ])
+                ->whereDate('transactions.date', '<', $split->date->format('Y-m-d'))
+                ->sum('quantity');
+
+            if ($qty_owned > 0) {
+
+                Transaction::create([
+                    'symbol' => $split->symbol,
+                    'portfolio_id' => $split->portfolio_id,
+                    'transaction_type' => 'BUY',
+                    'date' => $split->date,
+                    'quantity' => ($qty_owned * $split->split_amount) - $qty_owned,
+                    'cost_basis' => 0,
+                    'split' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        }
 
         // update market data with latest date
         MarketData::setSplitsHoldingSynced($symbol);
@@ -94,39 +110,20 @@ class Split extends Model
             ->selectRaw('MAX(date) as last_date')
             ->get()
             ->first();
-     
-        $transactions_meta = Transaction::where(['symbol' => $symbol])
-            ->selectRaw('MIN(date) as first_date')
-            ->selectRaw('MAX(date) as last_date')
-            ->get()
-            ->first();
 
-        $split_data = collect();
+        // assume need to populate all split data because it didnt exist before
+        $start_date = new \DateTime('@0');
+        $end_date = now();
 
-        if ($splits_meta->total_splits != 0) {
-            // need to fill in earlier splits 
-            if ($transactions_meta->first_date->lessThan($splits_meta->first_date)) {
-
-                $start_date = $transactions_meta->first_date;
-                $end_date = $splits_meta->first_date->subHours(48);
-            } 
-
-            // need to populate newer split data
-            if ($splits_meta->last_date?->lessThan($transactions_meta->last_date)) {
-
-                $start_date = $splits_meta->last_date->addHours(48);
-                $end_date =  now();
-            }
-
-        // need to populate all split data because it didnt exist before
-        } else {
-
-            $start_date = $transactions_meta->first_date;
-            $end_date = now();
+        // nope, need to populate newer split data
+        if ($splits_meta->total_splits) {
+            
+            $start_date = $splits_meta->last_date->addHours(48);
+            $end_date =  now();
         }
 
         // get some data
-        if ($start_date && $end_date) {
+        if ($split_data = collect() && $start_date && $end_date) {
             $split_data = app(MarketDataInterface::class)->splits($symbol, $start_date, $end_date);
         }
 

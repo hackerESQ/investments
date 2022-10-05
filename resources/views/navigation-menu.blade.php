@@ -104,7 +104,7 @@
                                 {{ __('Profile') }}
                             </x-jet-dropdown-link>
 
-                            <x-jet-dropdown-link href="{{ route('transaction.import') }}">
+                            <x-jet-dropdown-link href="{{ route('backup.import') }}">
                                 {{ __('Import / Export') }}
                             </x-jet-dropdown-link>
 

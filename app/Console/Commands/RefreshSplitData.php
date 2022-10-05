@@ -42,12 +42,12 @@ class RefreshSplitData extends Command
     {
         $holdings = Holding::distinct()->get(['symbol']);
 
-        if ($this->confirm('This can be destructive to existing transactions. Do you wish to continue?') || $this->option('force')) {
-            foreach ($holdings as $holding) {
-                $this->line('Refreshing ' . $holding->symbol);
-                Split::getSplitData($holding->symbol);
-            }
+        
+        foreach ($holdings as $holding) {
+            $this->line('Refreshing ' . $holding->symbol);
+            Split::getSplitData($holding->symbol);
         }
+    
         
     }
 }

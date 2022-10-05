@@ -26,7 +26,8 @@ class MarketData extends Model
         'fifty_two_week_high',
         'fifty_two_week_low',
         'splits_synced_to_holdings_at',
-        'dividends_last_updated_at',
+        'dividend_date',
+        'first_traded_date',
     ];
 
     /**
@@ -36,7 +37,7 @@ class MarketData extends Model
      */
     protected $casts = [
         'splits_synced_to_holdings_at' => 'datetime',
-        'dividends_last_updated_at' => 'datetime',
+        'dividend_date' => 'datetime',
     ];
 
     public static function setSplitsHoldingSynced($symbol) 
@@ -77,5 +78,10 @@ class MarketData extends Model
     public function holdings() 
     {
         return $this->hasMany(Holding::class, 'symbol', 'symbol');
+    }
+
+    public function scopeSymbol($query, $symbol)
+    {
+        return $query->where('symbol', $symbol);
     }
 }

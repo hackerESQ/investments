@@ -86,26 +86,4 @@ class TransactionController extends Controller
     {
         //
     }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function import(Request $request)
-    {
-        $file = $request->file('import')->store('/', 'local');
-
-        $import = (new TransactionImport)->import($file, 'local', \Maatwebsite\Excel\Excel::XLSX);
-
-        return redirect(route('portfolio.index'));
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function export()
-    {
-        return Excel::download(new TransactionExport, now()->format('Y_m_d') . '_transactions.xlsx');
-    }
 }

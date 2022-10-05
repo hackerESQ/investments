@@ -1,24 +1,22 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Sheets;
 
+use App\Models\Dividend;
 use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class TransactionExport implements FromCollection, WithHeadings
+class DividendsSheet implements FromCollection, WithHeadings, WithTitle
 {
     public function headings(): array
     {
         return [
-            '#',
-            'Symbol',
-            'Portfolio',
-            'Transaction',
-            'Quantity',
-            'Cost Basis',
-            'Sale Price',
+            'ID',
             'Date',
+            'Symbol',
+            'Amount',
             'Created',
             'Updated',
         ];
@@ -29,6 +27,14 @@ class TransactionExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        return Transaction::get();
+        return Dividend::get();
+    }
+
+     /**
+     * @return string
+     */
+    public function title(): string
+    {
+        return 'Dividends';
     }
 }

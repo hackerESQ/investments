@@ -1,8 +1,10 @@
 <?php
 
+use App\Exports\BackupExport;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     HoldingController,
+    ImportExportController,
     PortfolioController,
     TransactionController
 };
@@ -24,13 +26,14 @@ Route::redirect('/', '/portfolio', 301);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
+    Route::post('import', [ImportExportController::class, 'import'])->name('backup.import');
+    Route::view('import', 'pages.backup')->name('backup.importForm');
+    Route::get('export', [ImportExportController::class, 'export'])->name('backup.export');
+
     // portfolios resource
     Route::resource('portfolio', PortfolioController::class);
 
     // transactions resource
-    Route::view('transaction/import', 'pages.transactions.import')->name('transaction.importForm');
-    Route::post('transaction/import', [TransactionController::class, 'import'])->name('transaction.import');
-    Route::get('transaction/export', [TransactionController::class, 'export'])->name('transaction.export');
     Route::get('transaction', [TransactionController::class, 'index'])->name('transaction.index');
     Route::get('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'create'])->name('portfolio.transaction.create');
     Route::post('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'store'])->name('portfolio.transaction.store');
@@ -38,7 +41,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     // Route::put('portfolio/{portfolio}/transaction/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
 
     // holdings view
-    Route::get('portfolio/{portfolio}/holding/{holding}', [HoldingController::class, 'show'])->name('holding.show');
+    Route::get('portfolio/{portfolio}/holding/{holding:symbol}', [HoldingController::class, 'show'])->name('holding.show');
 
     Route::get('test', function(){
 

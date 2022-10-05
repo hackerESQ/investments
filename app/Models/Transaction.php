@@ -22,7 +22,8 @@ class Transaction extends Model
         'transaction_type',
         'quantity',
         'cost_basis',
-        'sale_price'
+        'sale_price',
+        'split'
     ];
 
     /**
@@ -41,6 +42,7 @@ class Transaction extends Model
         'date' => 'datetime',
         'first_date' => 'datetime',
         'last_date' => 'datetime',
+        'split' => 'boolean',
     ];
 
     /**
@@ -52,6 +54,7 @@ class Transaction extends Model
         parent::boot();
 
         static::saved(function ($model) {
+
             static::syncHolding($model);
         });
 

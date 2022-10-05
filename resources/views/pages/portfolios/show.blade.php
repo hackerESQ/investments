@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Viewing Portfolio') . ': ' . $portfolio->title }}
+            {{ $portfolio->title }}
 
             <x-link-button class="ml-4" href="{{ route('portfolio.index', $portfolio->id) }}">
                 {{ __('Back to Home') }}
