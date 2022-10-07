@@ -42,7 +42,7 @@ Username: user@user.com
 Password: password
 ```
 
-You should change these user credentials.
+If installing locally, you will need to configure a cron job to run your scheduler jobs or use the [artisan command](https://laravel.com/docs/9.x/scheduling#running-the-scheduler-locally). This ensures your daily change and market data is updated. Additionally, you'll need to run `php artisan queue:work` to ensure holdings are updated during imports.
 
 ### Docker (Sail)
 
