@@ -158,6 +158,10 @@
                 {{ __('Transactions') }}
             </x-jet-responsive-nav-link>
 
+            <x-jet-responsive-nav-link href="{{ route('daily_change.index') }}" :active="request()->routeIs('daily_change.*')">
+                {{ __('Daily Change') }}
+            </x-jet-responsive-nav-link>
+
         </div>
 
         <!-- Responsive Settings Options -->
