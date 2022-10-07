@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Holding;
 use App\Models\Portfolio;
+use App\Models\DailyChange;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\PortfolioRequest;
+use Asantibanez\LivewireCharts\Models\LineChartModel;
 
 class PortfolioController extends Controller
 {
@@ -22,7 +24,18 @@ class PortfolioController extends Controller
             return Holding::getPortfolioMetrics()->withoutWishlists()->first();
         });
 
-        return view('pages.portfolios.index', ['metrics' => $metrics]);
+        $daily_changes = DailyChange::myDailyChanges()->get();
+
+        $daily_change_chart_model = (new LineChartModel)->setTitle('Daily Gains/Losses (overall)');
+
+        foreach($daily_changes as $daily_change) {
+            $daily_change_chart_model->addPoint($daily_change->date->format('Y-m-d'), $daily_change->total_gain_loss);
+        }
+
+        return view('pages.portfolios.index', [
+            'metrics' => $metrics, 
+            'daily_change_chart_model' => $daily_change_chart_model
+        ]);
     }
 
     /**
