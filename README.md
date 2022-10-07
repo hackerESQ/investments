@@ -1,192 +1,86 @@
 # Investments
 
-A Laravel application to track your investment portfolio performance, dividends, and stock splits. Supports dockerizing or running as a native web application. 
+A Laravel application to track your investment portfolio performance, dividends, and stock splits using live market data. Supports dockerizing or running as a native web application. 
 
 * [Installation](#installation)
-* [Usage](#usage)
-  * [Set new setting](#set-new-setting)
-  * [Get all settings](#get-all-settings)
-  * [Get single setting](#get-single-setting)
-  * [Get certain setting (via array)](#get-certain-settings)
-  * [Check if a setting is set](#check-if-a-setting-is-set)
-* [Encryption](#encryption)
-* [Multi-tenancy](#multi-tenancy)
-* [Casting](#casting)
-* [Disable cache](#disable-cache)
-* [Hidden settings](#hidden-settings)
-* [Customize table name](#customize-table-name)
-  
+* [Import/Export](#import-export)
+* [Commands](#commands)
+  * [Refresh Market Data](#refresh-market-data)
+  * [Refresh Dividend Data](#refresh-dividend-data)
+  * [Refresh Splits Data](#refresh-splits-data)
+  * [Refresh Holding Data](#refresh-holding-data)
+  * [Capture Daily Change](#capture-daily-change)
   
 ## Installation
-This package can be used in Laravel 8.0+ and 9.0+.
 
-You can install the package via composer:
-
-``` bash
-composer require hackeresq/laravel-settings
-```
-
-Since Laravel 5.5+, service providers and aliases will automatically get registered and you can skip this step. To use this package with older versions, please use release < 2.0.
-
-You can publish [the migration](https://github.com/hackerESQ/settings/blob/master/database/migrations/create_settings_table.php) and [config](https://github.com/hackerESQ/settings/blob/master/config/settings.php) files, then migrate the new settings table all in one go, using:
+To begin, you should pull the source from github using `git clone` like this:
 
 ```bash
-php artisan vendor:publish --provider="HackerESQ\Settings\SettingsServiceProvider" --tag=migrations && php artisan vendor:publish --provider="HackerESQ\Settings\SettingsServiceProvider" --tag=config && php artisan migrate
+git clone https://github.com/hackerESQ/investments && cd investments
 ```
 
-<b>Success!</b> laravel-settings is now installed!
+Now, you'll need to install all required composer packages:
 
-## Usage
-
-Settings can be accessed using the easy-to-remember Facade, `Settings`.
-
-### Set new setting
-You can set new settings using the "set" method, which accepts an associative array of one or more key/value pairs. <b><mark>For security reasons,</mark></b> this will first check to see if such a setting key is "fillable," which is a configuration option in the [config/settings.php](https://github.com/hackerESQ/settings/blob/master/config/settings.php) file. 
-
-If such a key exists in the config, it will update the key to the new value passed. If the key does not exist in the fillable config, <i>it will disregard the change.</i> So, if this is a fresh install, do not expect the following to work:
-
-```php
-Settings::set(['firm_name'=>'new']);
+```bash
+composer install
 ```
 
-It will not set the new setting until you have either set the fillable fields in the config, or you have opted to force the setting. If you wish to force set a new setting, you should use the `force()` method before calling the `set()` method:
+Finally, you should configure your database credentials in the `.env` file. Now, you can choose to install locally (e.g. on Homestead or Valet) or on Docker (with the help of Sail).
 
-```php
-Settings::force()->set(['firm_name'=>'new']);
+### Local
+
+Assuming you already have your local development environment configured (database, queue, etc), you can simply seed the database with the first user:
+
+```bash
+php artisan db:seed
 ```
 
-As of version 3.0.4, the global override for forcing settings has been removed from the config file for this package. Instead, you can use a wildcard for the fillable property, like this:
-
-```php
-'fillable' => ['*']
-```
-
-This is more in line with standard Laravel syntax (e.g. for models).
-
-### Get all settings
-If no parameters are passed to the "get" method, it will return an array of all settings:
-
-```php
-Settings::get();
-```
-
-You can optionally hide specific settings using the `hidden` config as described [below](#hidden-settings). 
-
-### Get single setting
-You can return a single setting by passing a single setting key:
-
-```php
-Settings::get('firm_name');
-```
-
-### Get certain settings
-You can also return a list of specified settings by passing an array of setting keys:
-
-```php
-Settings::get(['firm_name','contact_types']);
-```
-
-### Check if a setting is set
-Sometimes you can't know if a setting has been set or not (i.e. boolean settings that will return false if the setting does not exist, but also if the setting has been set to false).
-
-```php
-Settings::has(['dark_theme']);
-```
-
-## Encryption
-
-You can define keys that should be encrypted automatically within the [config/settings.php](https://github.com/hackerESQ/settings/blob/master/config/settings.php) file. To do so, add the keys as such:
-
-```php
-'encrypt' => [
-        'twitter_client_id',
-        'twitter_client_secret',
-    ],
-```
-
-## Multi-tenancy
-This package can be used in a multi-tenant environment. The [set](#set-new-setting), [get](#get-all-settings), and [has](#check-if-a-setting-is-set) methods all read an internal 'tenant' attribute that can be set with the `tenant()` method. You can set the 'tenant' attribute by calling the `tenant()` method first, like this:
-
-```php
-Settings::tenant('tenant_name')->set(['firm_name'=>'foo bar']);
-
-// returns true (i.e. successfully set `firm name`)
+That's it. You can now access Investments at `localhost` or `investments.test`, depending on your local development environment. The first user's credentials are: 
 
 ```
-
-```php
-Settings::tenant('tenant_name')->get('firm_name');
-
-// returns 'foo bar'
-
+Username: user@user.com
+Password: password
 ```
 
-```php
-Settings::tenant('tenant_name')->has('firm_name');
+### Docker (Sail)
 
-// returns true
+Running Investments in Docker ensures the scheduler and queues are configured appropriately. But, there's several `.env` variables you should ensure to configure as appropriate. These determine how your Docker containers will function:
 
+```env
+APP_URL=localhost
+APP_SERVICE=investments.test
+APP_PORT=80
 ```
 
-The 'tenant' attribute passed can be any alphanumeric string. The 'tenant' attribute can also be left blank to have, for example, settings saved to a so-called "central" tenant. Note: the 'tenant' attribute is not strictly typed, and will be passed to the database query as a string. 
+You can now run `sail up` to start the webserver and database containers. But you'll need to create your first user, using the `sail artisan db:seed` command. This will create the first user: 
 
-## Casting
-You can cast settings to native PHP types using the `cast` option in the settings.php config. Here's an example of an array being cast to JSON and back to a native PHP array:
-
-
-```php
-// settings.php
-
-'cast' => [
-  'array_of_values' => 'json' 
-]
+```
+Username: user@user.com
+Password: password
 ```
 
-Which allows you to do the following:
+## Import/Export
 
-```php
-Settings::set(['array_of_values' => ['one', 'two', 'three']]);
+You can import and export all data within Investments.
 
-return Settings::get('array_of_values');
+## Commands
 
-// returns a PHP array: ['one', 'two', 'three']
-```
+There are various commands available to help facilitate your investment tracking.
 
-## Disable cache
-Depending on your use case, you may like to disable the cache (enabled by default). Disable the cache by modifying the [config/settings.php](https://github.com/hackerESQ/settings/blob/master/config/settings.php) file as such:
+### Refresh Market Data
+Coming soon.
 
-```php
-'cache' => false
-```
+### Refresh Dividend Data
+Coming soon.
 
-## Hidden settings
+### Refresh Splits Data
+Coming soon.
 
-You may wish to hide specific settings (like API keys or other sensitive user data) from inadvertent disclosure. You can set these settings in the [config/settings.php](https://github.com/hackerESQ/settings/blob/master/config/settings.php) file. To do so, add the keys as such:
+### Refresh Holding Data
+Coming soon.
 
-```php
-'hidden' => [
-        'twitter_client_secret',
-        'super_secret_password',
-    ],
-```
-
-Once these are set, they must be specifically requested using the `get()` method. In other words, this acts like the `$hidden` attribute on Laravel Eloquent models.
-
-In addition to hiding specific settings, you can opt to hide ALL the settings (unless specifically requested, of course). To do this, you can use a wildcard:
-
-```php
-'hidden' => ['*'],
-```
-
-## Customize table name
-
-For some cases, it may be necessary to customize the name of the table where settings are stored. By default, the migrations that come with this package create a 'settings' table. If, for some reason, it becomes necessary to change the default table, you can set the 'table' option in the [config/settings.php](https://github.com/hackerESQ/settings/blob/master/config/settings.php) file, like this:
-
-```php
-'table' => 'user_options_table',
-```
-
-This configuration option is not included in the base config file as this is an edge case that is not commonly encountered; but nonetheless a nice convenience to have when it does come up.
+### Capture Daily Change
+Coming soon.
 
 ## Finally
 ### Testing
