@@ -34,6 +34,7 @@ class DailyChangesSheet implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 'total_gain_loss' => $row['total_gain_loss'],
                 'total_dividends' => $row['total_dividends'],
                 'realized_gains' => $row['realized_gains'],
+                'notes' => $row['notes'],
             ]);
         }
     }

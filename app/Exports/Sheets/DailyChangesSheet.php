@@ -21,6 +21,7 @@ class DailyChangesSheet implements FromCollection, WithHeadings, WithTitle
             'Total Gain Loss',
             'Total Dividends',
             'Realized Gains',
+            'Notes'
         ];
     }
 

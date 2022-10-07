@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompositePrimaryKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DailyChange extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompositePrimaryKey;
 
     public $timestamps = false;
+
+    /**
+     * The primary key of the table.
+     * 
+     * @var string
+     */
+    protected $primaryKey = array('date', 'user_id');
 
     /**
      * Table name for the model
@@ -31,6 +39,7 @@ class DailyChange extends Model
         'total_gain_loss',
         'total_dividends',
         'realized_gains',
+        'notes',
     ];
 
     /**
