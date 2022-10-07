@@ -26,11 +26,6 @@
             <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200">
                 @livewire('portfolio-index-table')
             </div>
-            <div class="bg-white shadow-xl sm:rounded-lg p-6 mt-6 border-gray-200" style="height: 20rem;">
-                <livewire:livewire-line-chart
-                    key="one" :line-chart-model="$daily_change_chart_model"
-                />
-            </div>
         </div>
     </div>
 </x-app-layout>

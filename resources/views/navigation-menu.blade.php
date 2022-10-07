@@ -19,6 +19,10 @@
                     <x-jet-nav-link href="{{ route('transaction.index') }}" :active="request()->routeIs('transaction.*')">
                         {{ __('Transactions') }}
                     </x-jet-nav-link>
+
+                    <x-jet-nav-link href="{{ route('daily_change.index') }}" :active="request()->routeIs('daily_change.*')">
+                        {{ __('Daily Change') }}
+                    </x-jet-nav-link>
                 </div>
             </div>
 

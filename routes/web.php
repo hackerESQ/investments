@@ -3,6 +3,7 @@
 use App\Exports\BackupExport;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
+    DailyChangeController,
     HoldingController,
     ImportExportController,
     PortfolioController,
@@ -34,6 +35,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
     // portfolios resource
     Route::resource('portfolio', PortfolioController::class);
 
+    // dailychange
+    Route::get('daily-change', [DailyChangeController::class, 'index'])->name('daily_change.index');
+
     // transactions resource
     Route::get('transaction', [TransactionController::class, 'index'])->name('transaction.index');
     Route::get('portfolio/{portfolio}/transaction/create', [TransactionController::class, 'create'])->name('portfolio.transaction.create');
@@ -43,31 +47,4 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     // holdings view
     Route::get('portfolio/{portfolio}/symbol/{holding:symbol}', [HoldingController::class, 'show'])->name('holding.show');
-
-    Route::get('test', function(){
-
-
-
-        \App\Models\Split::syncTransactions(['symbol' => 'AAPL']);
-
-
-
-
-
-
-
-        // $test = \App\Models\Transaction::where('symbol', 'DSI')
-        // ->selectRaw('MIN(date) as first_transaction')
-        // ->first();
-
-        // return (new DateTime($test->first_transaction))->format('y-m-d');
-
-
-        // $date = \App\Models\Dividend::where(['symbol' => 'DSI'])
-        //     ->selectRaw('MIN(date) as first_dividend_date')
-        //     ->selectRaw('MAX(date) as last_dividend_date')
-        //     ->get();
-            
-        // $date->get('first_dividend');
-    });
 });
