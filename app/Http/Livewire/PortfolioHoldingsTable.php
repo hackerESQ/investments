@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Holding;
 use App\Models\Portfolio;
 use App\Traits\FormatsMoney;
+use Carbon\Carbon;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
@@ -94,7 +95,7 @@ class PortfolioHoldingsTable extends DataTableComponent
             Column::make('Market Data Age', 'market_data_age')
                 ->sortable()
                 ->format(function ($value, $column, $row) {
-                    return $value->diffForHumans();
+                    return Carbon::make($value)->diffForHumans();
                 }),
             Column::make('Updated At')
                 ->sortable(),

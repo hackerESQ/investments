@@ -40,8 +40,14 @@
                 <p> <b>Total Cost Basis:</b>   ${{ number_format($holding->total_cost_basis, 2) }} </p>
                 <p> <b>Realized Gain/Loss ($):</b>  ${{ number_format($holding->realized_gain_loss_dollars, 2) }} </p>
                 <p> <b>Dividends Earned:</b>   ${{ number_format($holding->dividends_earned, 2) }} </p>
-                <p> <b>52 week:</b>   ${{ number_format($holding->market_data->fifty_two_week_low, 2) }} - ${{ number_format($holding->market_data->fifty_two_week_high, 2) }}</p>
+                <p> <b>52 week:</b>   <x-fifty-two-week-range 
+                    :low="$holding->market_data->fifty_two_week_low" 
+                    :high="$holding->market_data->fifty_two_week_high" 
+                    :current="$holding->market_data->market_value"
+                />
                 <p class=" py-4" style="font-size:.75em"> Last Update: {{ $holding->market_data->updated_at }}</p>
+
+
             </div>
         </div>
 
