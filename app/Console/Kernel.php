@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(RefreshMarketData::class)->everyMinute(); // configurable in 'config.market_data'
+        $schedule->command(RefreshMarketData::class)->weekdays()->everyMinute(); // configurable in 'config.market_data'
         $schedule->command(CaptureDailyChange::class)->weekdays();
         $schedule->command(RefreshDividendData::class)->weekly();
         $schedule->command(RefreshSplitData::class)->monthly();
