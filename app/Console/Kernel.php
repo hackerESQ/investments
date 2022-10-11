@@ -2,9 +2,12 @@
 
 namespace App\Console;
 
+
 use App\Console\Commands\RefreshMarketData;
-use Illuminate\Console\Scheduling\Schedule;
+use App\Console\Commands\CaptureDailyChange;
 use App\Console\Commands\RefreshDividendData;
+use App\Console\Commands\RefreshSplitData;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
