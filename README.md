@@ -78,7 +78,7 @@ Export is simple. Each set of data is on a separate worksheet within the exporte
 
 ## Market Data Interface
 
-Market data is pulled from Yahoo finance using the [scheb/yahoo-finance-api](https://github.com/scheb/yahoo-finance-api) library. However, you can choose to create your own market data interface if you choose. See the [MarketDataInterface.php](https://github.com/hackerESQ/investments/blob/main/app/Interfaces/MarketData/MarketDataInterface.php) file for more information on how to define your own interface.
+Market data is pulled from Yahoo finance using the [scheb/yahoo-finance-api](https://github.com/scheb/yahoo-finance-api) library by default. However, you can choose to create your own market data interface if you choose. See the [MarketDataInterface.php](https://github.com/hackerESQ/investments/blob/main/app/Interfaces/MarketData/MarketDataInterface.php) file for more information on how to define your own interface. The interface is configured in the [market_data.php](https://github.com/hackerESQ/investments/blob/main/app/config/market_data.php) config file.
 
 ## Commands
 
