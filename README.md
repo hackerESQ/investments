@@ -4,6 +4,7 @@ A Laravel application to track your investment portfolio performance, dividends,
 
 * [Installation](#installation)
 * [Import/Export](#importexport)
+* [Market Data Interface](#market-data-interface)
 * [Commands](#commands)
   * [Refresh Market Data](#refresh-market-data)
   * [Refresh Dividend Data](#refresh-dividend-data)
@@ -74,6 +75,10 @@ To begin importing data, you'll need to get the import template. You can just ex
 ### Export
 
 Export is simple. Each set of data is on a separate worksheet within the exported file.
+
+## Market Data Interface
+
+Market data is pulled from Yahoo finance using the [scheb/yahoo-finance-api](https://github.com/scheb/yahoo-finance-api) library. However, you can choose to create your own market data interface if you choose. See the [MarketDataInterface.php](https://github.com/hackerESQ/investments/blob/main/app/Interfaces/MarketData/MarketDataInterface.php) file for more information on how to define your own interface.
 
 ## Commands
 
