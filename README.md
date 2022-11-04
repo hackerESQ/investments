@@ -2,6 +2,8 @@
 
 A Laravel application to track your investment portfolio performance, dividends, and stock splits using live market data. 
 
+![Investments Screenshot](/screenshot.png?raw=true "Investments Screenshot")
+
 * [Installation](#installation)
 * [Import/Export](#importexport)
 * [Market Data Interface](#market-data-interface)
