@@ -16,6 +16,7 @@ class AllTransactionsTable extends DataTableComponent
 
     public bool $columnSelect = true;
     public string $defaultSortColumn = 'date';
+    public string $defaultSortDirection = 'desc';
     public bool $reorderEnabled = false;
     public bool $hideBulkActionsOnEmpty = true;
     public array $bulkActions = []; 
