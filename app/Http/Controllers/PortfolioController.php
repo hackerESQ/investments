@@ -20,8 +20,8 @@ class PortfolioController extends Controller
     public function index()
     {
         // get stats
-        $metrics = cache()->remember('portfolio-metrics', 60, function () {
-            return Holding::getPortfolioMetrics()->withoutWishlists()->first();
+        $metrics = cache()->remember('portfolio-metrics-' . auth()->user()->id, 60, function () {
+            return Holding::getPortfolioMetrics()->myHoldings()->withoutWishlists()->first();
         });
 
         return view('pages.portfolios.index', [
@@ -63,7 +63,7 @@ class PortfolioController extends Controller
         $this->authorize('view', $portfolio);
 
         // get stats
-        $key = 'portfolio-metrics-' . Str::kebab($portfolio->title);
+        $key = 'portfolio-metrics-' . $portfolio->id;
         $metrics = cache()->remember($key, 60, function () use ($portfolio) {
             return Holding::where(['portfolio_id' => $portfolio->id])
                 ->getPortfolioMetrics()

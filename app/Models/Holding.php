@@ -66,6 +66,16 @@ class Holding extends Model
     }
 
     /**
+     * get related portfolio for holding
+     *
+     * @return void
+     */
+    public function portfolio() 
+    {
+        return $this->belongsTo(Portfolio::class);
+    }
+
+    /**
      * get related splits for holding
      *
      * @return void
@@ -85,6 +95,13 @@ class Holding extends Model
             ->where('portfolios.wishlist', 0);
     }
 
+    public function scopeMyHoldings($query)
+    {
+        return $query->whereHas('portfolio', function($query) {
+            $query->whereRelation('users', 'id', auth()->user()->id);
+        });
+    }
+
     public function scopeGetPortfolioMetrics($query) 
     {
         $query->selectRaw('SUM(holdings.dividends_earned) AS total_dividends_earned')
@@ -94,6 +111,7 @@ class Holding extends Model
             ->selectRaw('@total_gain_loss_dollars:=(@total_market_value - @sum_total_cost_basis) AS total_gain_loss_dollars')
             ->selectRaw('(@total_gain_loss_dollars / @sum_total_cost_basis) * 100 AS total_gain_loss_percent')
             ->join('market_data', 'market_data.symbol', 'holdings.symbol');
+            // =(VLOOKUP(if(today or end of year),'Daily Change'!$A:$B,2,false) - VLOOKUP(first of year),'Daily Change'!$A:$C,3,false)) / (SUMIFS(transactions.cost_basis_lot,transactions.date,"<"&date(left(D19,4)+1,1,1),transactions.type,"Buy")-SUMIFS(transactions.cost_basis_lot,transactions.date,"<"&date(left(D19,4)+1,1,1),transactions.type,"Sell"))-1
     }
 
     public function scopeSymbol($query, $symbol)
