@@ -123,7 +123,7 @@ class Dividend extends Model
             $dividend_data_latest_date = $dividend_data->sortByDesc('date')->first()['date'];
             
             if ($market_data->dividend_date < $dividend_data_latest_date) {
-                $market_data->update(['dividend_date' => $dividend_data_latest_date]);
+                $market_data->update(['dividend_date' => $dividend_data_latest_date]); // why is this set to latest date?
             }
         }
 
