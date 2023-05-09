@@ -16,7 +16,7 @@
         "livewire/livewire": "^2.5",
         "maatwebsite/excel": "^3.1",
         "rappasoft/laravel-livewire-tables": "^1.14",
-        "scheb/yahoo-finance-api": "^4.2"
+        "scheb/yahoo-finance-api": "^4.6"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
