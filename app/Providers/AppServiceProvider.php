@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         // hidden registration
-        if (Request::input('registration_key') == config('auth.registration_key')) {
+        if (config('auth.registration_key') && (Request::input('registration_key') == config('auth.registration_key'))) {
             config([
                 'fortify.features' => array_merge(config('fortify.features'), [Features::registration()])
             ]);
